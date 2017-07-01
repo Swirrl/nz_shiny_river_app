@@ -7,7 +7,7 @@
 
 library(shiny)
 
-navbarPage("ONS Linked Data", id="nav",
+navbarPage("New Zealand River Monitoring", id="nav",
            
            tabPanel("MAP",
                     div(class="outer",
@@ -26,30 +26,9 @@ navbarPage("ONS Linked Data", id="nav",
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
                                       width = 450, height = "auto",
                                       
-                                      h2("Choose Data to compare"),
-                                      selectInput("map","Map and x-axis of scatterplot:",
-                                                  c("Median Pay (ONS)" = "mapapay",
-                                                    "Median Male Pay (ONS)" = "mapmpay",
-                                                    "Median Female Pay (ONS)" = "mapfpay",
-                                                    "Pay Gap (ONS)" = "mapgap",
-                                                    "Breastfeeding (ScotGov)" = "mapbf",
-                                                    "Deliberate Fires (ScotGov)" = "mapfire",
-                                                    "Jobseekers (ScotGov)" = "mapjsa",
-                                                    "Dwellings per Hectare (ScotGov)" = "mapdwell",
-                                                    "Alcohol-related Discharge (ScotGov)" = "mapalc"
-                                                  )),
-                                      selectInput("filter","y-axis of scatterplot:",
-                                                  c("Median Pay (ONS)" = "filterapay",
-                                                    "Median Male Pay (ONS)" = "filtermpay",
-                                                    "Median Female Pay (ONS)" = "filterfpay",
-                                                    "Pay Gap (ONS)" = "filtergap",
-                                                    "Breastfeeding (ScotGov)" = "filterbf",
-                                                    "Deliberate Fires (ScotGov)" = "filterfire",
-                                                    "Jobseekers (ScotGov)" = "filterjsa",
-                                                    "Dwellings per Hectare (ScotGov)" = "filterdwell",
-                                                    "Alcohol-related Discharge (ScotGov)" = "filteralc"
-                                                  ),
-                                                  selected = c("Breastfeeding (ScotGov)" = "filterbf")),
+                                      h2("River Flow Monitoring Stations"),
+                                      
+                                      
                                       
                                       #sliderInput("paygaprange", "Choose the range of values you would like to display", min = -5000, max = 20000, value = c(-5000,20000)),
                                       #numericInput("lower", "Filter values between", value= -5000),
@@ -82,7 +61,7 @@ navbarPage("ONS Linked Data", id="nav",
                         ),
                         
                         tags$div(id="cite",
-                                 'Data compiled for: ', tags$em('Demonstration ONS & Scottish Government Linked Data'), ' by Jamie Whyte / Swirrl (2017).'
+                                 'Data compiled for: ', tags$em('New Zealand Ministry of Environment'), ' Swirrl (2017).'
                         )
                     )
            ),
