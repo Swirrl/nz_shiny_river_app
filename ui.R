@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny)
+library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plyr)
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
@@ -27,6 +27,8 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       width = 450, height = "auto",
                                       
                                       h2("River Flow Monitoring Stations"),
+                                      #plotOutput("plot1"),
+                                    
                                       
                                       
                                       
