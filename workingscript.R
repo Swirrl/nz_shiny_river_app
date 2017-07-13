@@ -25,7 +25,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT *
 WHERE {
   ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-  ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> <http://envdatapoc.co.nz/id/measurement-site/HRC-00003> .
+  #?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> <http://envdatapoc.co.nz/id/measurement-site/HRC-00003> .
   ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?site .
   ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
   ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
@@ -56,6 +56,7 @@ chartdata <- data.frame("site" = monsitesflow$name,
 #Chart with zero-based x axis
 measurementchart <- ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                        panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() + scale_y_continuous(limits=c(0,6000))
+measurementchart
 
 #Chart with non-zero-based x axis
 measurementchart <- ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
