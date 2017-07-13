@@ -7,7 +7,8 @@
 
 library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plyr)
 
-rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
+#To add rivers back in need to uncomment this line and the line adding the polygon to the map
+#rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
 
 #endpoint <- "http://envdatapoc.co.nz/sparql"
 
@@ -128,8 +129,8 @@ server <- (function(input, output, session) {
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
       addCircleMarkers(data = monsites, popup = ~name, color = "#444444", fillColor = ~palFlow(value), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
-      addLegend("bottomleft", pal = palFlow, values = monsites$value, opacity = 1) %>%
-      addPolygons(data = rivers)
+      addLegend("bottomleft", pal = palFlow, values = monsites$value, opacity = 1)
+      #addPolygons(data = rivers)
                 
     
   })
