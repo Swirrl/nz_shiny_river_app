@@ -7,9 +7,11 @@
 
 library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plyr)
 
+rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
+
 #endpoint <- "http://envdatapoc.co.nz/sparql"
 
-#This endpoint is th 
+#This endpoint is the drafter one, with no authentication or 
 endpoint <- "https://production-drafter-nz.publishmydata.com/v1/sparql/live"
 
 #Query to get all the monitoring sites. Features a subquery to pull out only the most recent measurement for each site
@@ -92,7 +94,7 @@ query3_2 <- " .
     
   }"
 
-provtiles = 'Esri.WorldImagery'
+provtiles = 'Esri.WorldStreetMap'
 
 server <- (function(input, output, session) {
   
@@ -126,7 +128,8 @@ server <- (function(input, output, session) {
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
       addCircleMarkers(data = monsites, popup = ~name, color = "#444444", fillColor = ~palFlow(value), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
-      addLegend("bottomleft", pal = palFlow, values = monsites$value, opacity = 1)
+      addLegend("bottomleft", pal = palFlow, values = monsites$value, opacity = 1) %>%
+      addPolygons(data = rivers)
                 
     
   })
@@ -172,7 +175,6 @@ observe({
   {
     provtiles <- 'Esri.WorldImagery'
   }
-  print(provtiles)
   leafletProxy("map") %>%
     addProviderTiles(provtiles)
 })
