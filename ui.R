@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plyr)
+library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plyr); library(plotly)
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
@@ -90,9 +90,29 @@ navbarPage("New Zealand River Monitoring", id="nav",
            
            tabPanel("DATA",
                     fluidRow(
-                      column(10,
+                      column(12,
                              div(h3("Datatable")),
                              DT::dataTableOutput("table")
+                      )
+                    )
+           ),
+           tabPanel("CHART",
+                    fluidRow(
+                      column(12,
+                             div(selectInput("sitesel","Select sites:",monsites$name,multiple=TRUE))),
+                      column(6,
+                             div(actionButton("refreshchart","Refresh"))),
+                      column(12,
+                             div(h3("Big Line")),
+                             plotlyOutput("plot2_big_line", height=600)
+                      )
+                    )
+           ),
+           tabPanel("DASHBOARD",
+                    fluidRow(
+                      column(12,
+                             div(h3("Dashboard..!")),
+                             div(h4("Possibly coming soon"))
                       )
                     )
            ),
