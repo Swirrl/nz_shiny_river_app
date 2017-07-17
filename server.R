@@ -103,6 +103,7 @@ qd <- SPARQL(endpoint,newquery)
 monsites <- qd$results
 monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
 monsites$percdiffmax <- (monsites$value - monsites$maxflowval)*100
+monsites$obs <- gsub('^.|.$', '', monsites$obs)
 #monsites <- monsites[which (monsites$mtype == "<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>"), ]
 dtmonsites <- data.frame("Name" = monsites$name,
                          "Latest" = monsites$value,
@@ -110,7 +111,8 @@ dtmonsites <- data.frame("Name" = monsites$name,
                          "Elevation" = monsites$elevation,
                          "Catchment" = monsites$catchmentname,
                          "Lat" = monsites$lat,
-                         "Long" = monsites$long)
+                         "Long" = monsites$long,
+                         "URI" = monsites$obs)
 
 query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -155,6 +157,8 @@ query4_2 <- "'))
 provtiles = 'Esri.WorldStreetMap'
 
 server <- (function(input, output, session) {
+  
+  
   
   #draw the table in the 'data' tab
   output$table <- DT::renderDataTable(datatable(dtmonsites, escape = TRUE))
@@ -222,10 +226,12 @@ observe({
     ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() 
   })
   output$stationname <- renderText(sprintf(filtmonsites$name))
-  output$maxflow <- renderText(paste0(max(chartdata$value, na.rm = TRUE),' m3 / sec'))
-  output$climate <-renderText('Warm and wet')
+  output$maxflow <- renderText(paste0(filtmonsites$maxflowval,' m3 / sec'))
+  output$meanflow <- renderText(paste0("<a href='",filtmonsites$obs,"'>",filtmonsites$meanannflowval," m3 / sec</a>"))
+  output$climate <-renderText(paste0(filtmonsites$climatelabel))
   output$elevation <-renderText(paste0(filtmonsites$elevation,'m'))
-  output$geology <-renderText('Volcanic basic')
+  output$geology <-renderText(paste0(filtmonsites$geologylabel))
+  output$landcover <-renderText(paste0(filtmonsites$landcoverlabel))
   chartdatasorted <- chartdata[order(chartdata$date), ]
   latestmeasurement <- last(chartdatasorted$value)
   imgsource <- filtmonsites$image
@@ -233,7 +239,15 @@ observe({
        c('<img src="',imgsource,'", height=300, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')
     })
   output$latestreading <- renderText(paste0(latestmeasurement,' m3 / sec'))
+  output$downloadData <- downloadHandler(
+    filename = function() { paste(Sys.time(), '.csv', sep='') },
+    content = function(file) {
+      write.csv(chartdata, file)
+    }
+  )
 })
+
+
 
 observe({
   if(input$mapbackground == 'terr') {
@@ -268,7 +282,7 @@ observeEvent(input$refreshchart, {
                           "value" = monsitesmeasuremulti$value)
   
   output$plot2_big_line <- renderPlotly({ggplotly(
-    ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site))) 
+    ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.5) + labs(x="Date/Time", y="Flow Volume m3/second")) 
   })
   
 })
