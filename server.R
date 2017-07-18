@@ -16,57 +16,24 @@ endpoint <- "http://guest:eidipoc@envdatapoc.co.nz/sparql"
 #This endpoint is the drafter one, with no authentication or 
 #endpoint <- "https://production-drafter-nz.publishmydata.com/v1/sparql/live"
 
-#Query to get all the monitoring sites. Features a subquery to pull out only the most recent measurement for each site
-newquery <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+startquery <-  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT  DISTINCT ?obs ?value ?resultset ?latest ?sitesub ?lat ?long ?siteID ?name ?reach ?elevation ?mgmnt ?catchmentname ?image ?geologylabel ?landcoverlabel ?climatelabel ?malfval ?maxflowval ?minflowval ?meanannflowval ?meanfloodflowval ?climate ?geology ?landcover ?malf ?maxflow ?minflow ?meanannflow ?meanfloodflow
+SELECT DISTINCT *
 WHERE {
-{ SELECT (max(?datetime) AS ?latest) ?sitesub
+{SELECT (max(?datetime) AS ?latest) ?sitesub
 WHERE {
+?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
 ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
 ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
-?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
 ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
-?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?valuesub .
-OPTIONAL {?sitesub <http://schema.org/image> ?image .}
-?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
-?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
-?sitesub rdfs:label ?name .
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/MALF> ?malf .
-?malf <http://qudt.org/1.1/schema/qudt#numericValue> ?malfval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/maxRecordedFlow> ?maxflow .
-?maxflow <http://qudt.org/1.1/schema/qudt#numericValue> ?maxflowval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFlow> ?meanannflow .
-?meanannflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanannflowval . }
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFloodFlow> ?meanfloodflow .
-?meanfloodflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanfloodflowval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/minRecordedFlow> ?minflow .
-?minflow <http://qudt.org/1.1/schema/qudt#numericValue> ?minflowval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
-?catchment rdfs:label ?catchmentname .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
-?reach <http://envdatapoc.co.nz/def/climate> ?climate .
-?reach <http://envdatapoc.co.nz/def/geology> ?geology .
-?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
-?climate rdfs:label ?climatelabel.
-?geology rdf:label ?geologylabel.
-?landcover rdfs:label ?landcoverlabel .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
 }
 GROUP BY ?sitesub
-}
-?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
-?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
+         }
 ?obs <http://www.w3.org/ns/sosa/resultTime> ?latest .
+?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .  
+?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
+?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
 ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
-OPTIONAL {?sitesub <http://schema.org/image> ?image .}
 ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
 ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
 ?sitesub rdfs:label ?name .
@@ -91,17 +58,98 @@ OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
 ?geology rdf:label ?geologylabel.
 ?landcover rdfs:label ?landcoverlabel .}
 OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
-#filter (?latest = ?datetime  ?sitesub = ?site)
-}
-ORDER BY asc(?siteID)"
+OPTIONAL {?sitesub <http://schema.org/image> ?image .}
+}"
+
+#Can probably archive this query, as the 'startquery' does the same thing (i think) but is faster.
+#Query to get all the monitoring sites. Features a subquery to pull out only the most recent measurement for each site
+# newquery <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# SELECT  DISTINCT ?obs ?value ?resultset ?latest ?sitesub ?lat ?long ?siteID ?name ?reach ?elevation ?mgmnt ?catchmentname ?image ?geologylabel ?landcoverlabel ?climatelabel ?malfval ?maxflowval ?minflowval ?meanannflowval ?meanfloodflowval ?climate ?geology ?landcover ?malf ?maxflow ?minflow ?meanannflow ?meanfloodflow
+# WHERE {
+# { SELECT (max(?datetime) AS ?latest) ?sitesub
+# WHERE {
+# ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
+# ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
+# ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
+# ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
+# ?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
+# ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
+# ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?valuesub .
+# OPTIONAL {?sitesub <http://schema.org/image> ?image .}
+# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
+# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
+# ?sitesub rdfs:label ?name .
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/MALF> ?malf .
+# ?malf <http://qudt.org/1.1/schema/qudt#numericValue> ?malfval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/maxRecordedFlow> ?maxflow .
+# ?maxflow <http://qudt.org/1.1/schema/qudt#numericValue> ?maxflowval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFlow> ?meanannflow .
+# ?meanannflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanannflowval . }
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFloodFlow> ?meanfloodflow .
+# ?meanfloodflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanfloodflowval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/minRecordedFlow> ?minflow .
+# ?minflow <http://qudt.org/1.1/schema/qudt#numericValue> ?minflowval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
+# ?catchment rdfs:label ?catchmentname .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
+# ?reach <http://envdatapoc.co.nz/def/climate> ?climate .
+# ?reach <http://envdatapoc.co.nz/def/geology> ?geology .
+# ?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
+# ?climate rdfs:label ?climatelabel.
+# ?geology rdf:label ?geologylabel.
+# ?landcover rdfs:label ?landcoverlabel .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
+# }
+# GROUP BY ?sitesub
+# }
+# ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
+# ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
+# ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
+# ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
+# ?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
+# ?obs <http://www.w3.org/ns/sosa/resultTime> ?latest .
+# ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
+# OPTIONAL {?sitesub <http://schema.org/image> ?image .}
+# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
+# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
+# ?sitesub rdfs:label ?name .
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/MALF> ?malf .
+# ?malf <http://qudt.org/1.1/schema/qudt#numericValue> ?malfval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/maxRecordedFlow> ?maxflow .
+# ?maxflow <http://qudt.org/1.1/schema/qudt#numericValue> ?maxflowval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFlow> ?meanannflow .
+# ?meanannflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanannflowval . }
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFloodFlow> ?meanfloodflow .
+# ?meanfloodflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanfloodflowval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/minRecordedFlow> ?minflow .
+# ?minflow <http://qudt.org/1.1/schema/qudt#numericValue> ?minflowval .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
+# ?catchment rdfs:label ?catchmentname .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
+# ?reach <http://envdatapoc.co.nz/def/climate> ?climate .
+# ?reach <http://envdatapoc.co.nz/def/geology> ?geology .
+# ?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
+# ?climate rdfs:label ?climatelabel.
+# ?geology rdf:label ?geologylabel.
+# ?landcover rdfs:label ?landcoverlabel .}
+# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
+# #filter (?latest = ?datetime  ?sitesub = ?site)
+# }
+# ORDER BY asc(?siteID)"
 
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-qd <- SPARQL(endpoint,newquery)
+qd <- SPARQL(endpoint,startquery)
 
 
 monsites <- qd$results
 monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
+
+#highlow <- function (x,y) {ifelse ((x > y),'HIGHER','LOWER')}
+
 monsites$percdiffmax <- (monsites$value - monsites$maxflowval)*100
 monsites$obsnoangle <- gsub('^.|.$', '', monsites$obs)
 monsites$sitesubnoangle <- gsub('^.|.$', '', monsites$sitesub)
@@ -145,6 +193,7 @@ query3_2 <- " .
     
   }"
 
+#This is the query that powers the multi-line chart
 query4_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?resultset ?datetime ?value ?name ?type ?reach
@@ -206,7 +255,7 @@ server <- (function(input, output, session) {
     leaflet() %>% 
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
-      addCircleMarkers(data = monsites, popup = ~paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',siteID,'?tab=api">',name,'</a>'), color = "#444444", fillColor = ~palFlowDiffMax(percdiffmax), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
+      addCircleMarkers(data = monsites, popup = ~paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',siteID,'?tab=api">',name,'</a></div><div class="popupbody">Latest measurement: <a href="',resultsetnoangle,'?tab=api">',value,'</a> m<sup>3</sup> / sec</div><div class="popupbody">The annual mean flow at this site is ', meanannflowval,' m <sup>3</sup> / sec</div>'), color = "#444444", fillColor = ~palFlowDiffMax(percdiffmax), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
       addLegend("bottomleft", pal = palFlowDiffMax, values = monsites$percdiffmax, opacity = 1)
       #addPolygons(data = rivers)
                 

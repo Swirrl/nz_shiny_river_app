@@ -9,6 +9,15 @@ library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(ra
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
+           tabPanel("ABOUT",
+                    fluidRow(
+                      column(10,
+                             div(h5("About this tool")),
+                             p("This tool is a demonstration to show that data from different river monitoring sites can be shown in one R-Shiny visualisation.")
+                             
+                      )
+                    )
+           ),
            tabPanel("MAP",
                     div(class="outer",
                         
@@ -28,6 +37,18 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr'),
                                       h2("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),
+                                      tags$head(tags$style(".popupbody{
+                                            font-weight: bold;
+                                            font-size: 16px;
+                                            }"
+                                              )
+                                      ),
+                                      tags$head(tags$style(".popuptitle{
+                                            font-weight: bold;
+                                                           font-size: 24px;
+                                                           }"
+                                              )
+                                      ),
                                       tags$head(tags$style("#stationname{color: #222222;
                                                                         font-size: 24px;
                                                                         font-weight: bold;
@@ -122,16 +143,5 @@ navbarPage("New Zealand River Monitoring", id="nav",
                       )
                     )
            ),
-           
-           tabPanel("ABOUT",
-                    fluidRow(
-                      column(10,
-                             div(h5("About this tool")),
-                             p("This tool is a demonstration to show that data from different river monitoring sites can be shown in one R-Shiny visualisation.")
-                               
-                      )
-                    )
-           ),
-           
            conditionalPanel("false", icon("crosshair"))
 )
