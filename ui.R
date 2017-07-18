@@ -27,14 +27,14 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       width = 450, height = 900,
                                       radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr'),
                                       h2("River Flow Monitoring Stations"),
-                                      textOutput("stationname"),
+                                      htmlOutput("stationname"),
                                       tags$head(tags$style("#stationname{color: #222222;
                                                                         font-size: 24px;
                                                                         font-weight: bold;
                                                                         }"
                                                           )
                                                 ),
-                                      tags$head(tags$style("#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
+                                      tags$head(tags$style("#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
                                                                         font-size: 26px;
                                                                         font-weight: bold;
                                                                         display:inline;
@@ -54,13 +54,16 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                                    id = "plot_click"
                                                  )),
                                       div(downloadButton('downloadData', 'Download the data')),
-                                      p(h3("Latest reading: ",style="display:inline"), textOutput('latestreading')),
+                                      p(h3("Latest reading: ",style="display:inline"), htmlOutput('latestreading')),
                                       p(h3("Mean annual flow: ",style="display:inline"), htmlOutput('meanflow')),
-                                      p(h3("Max flow: ",style="display:inline"), textOutput('maxflow')),
-                                      p(h3("Landcover: ",style="display:inline"), textOutput('landcover')),
-                                      p(h3("Climate: ",style="display:inline"), textOutput('climate')),
-                                      p(h3("Elevation: ",style="display:inline"), textOutput('elevation')),
-                                      p(h3("Geology: ",style="display:inline"), textOutput('geology')),
+                                      p(h3("Min flow: ",style="display:inline"), htmlOutput('minflow')),
+                                      p(h3("Max flow: ",style="display:inline"), htmlOutput('maxflow')),
+                                      p(h3("MALF: ",style="display:inline"), htmlOutput('malf')),
+                                      p(h3("Mean annual flood flow: ",style="display:inline"), htmlOutput('meanfloodflow')),
+                                      p(h3("Landcover: ",style="display:inline"), htmlOutput('landcover')),
+                                      p(h3("Climate: ",style="display:inline"), htmlOutput('climate')),
+                                      p(h3("Elevation: ",style="display:inline"), htmlOutput('elevation')),
+                                      p(h3("Geology: ",style="display:inline"), htmlOutput('geology')),
                                       htmlOutput(("photo"), align = 'center'),
                                       textOutput("click_scatter"),
                                       #DT::dataTableOutput("areastats"),
