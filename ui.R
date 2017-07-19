@@ -55,7 +55,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                                                         }"
                                                           )
                                                 ),
-                                      tags$head(tags$style("#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
+                                      tags$head(tags$style("#latestdatetime,#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
                                                                         font-size: 26px;
                                                                         font-weight: bold;
                                                                         display:inline;
@@ -76,6 +76,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                                  )),
                                       div(downloadButton('downloadData', 'Download the data')),
                                       p(h3("Latest reading: ",style="display:inline"), htmlOutput('latestreading')),
+                                      p(h3("Date/time of reading: ",style="display:inline"), htmlOutput('latestdatetime')),
                                       p(h3("Mean annual flow: ",style="display:inline"), htmlOutput('meanflow')),
                                       p(h3("Min flow: ",style="display:inline"), htmlOutput('minflow')),
                                       p(h3("Max flow: ",style="display:inline"), htmlOutput('maxflow')),

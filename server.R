@@ -142,6 +142,7 @@ OPTIONAL {?sitesub <http://schema.org/image> ?image .}
 # }
 # ORDER BY asc(?siteID)"
 
+#function that formats numbers
 formatNos <- function (x) {
   formatC(x, digits = 2, format = "f", big.mark = ",")
 }
@@ -172,6 +173,8 @@ monsites$resultsetnoangle <- gsub('^.|.$', '', monsites$resultset)
 #monsites <- monsites[which (monsites$mtype == "<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>"), ]
 dtmonsites <- data.frame("Name" = monsites$name,
                          "Latest" = monsites$value,
+                         "Date/Time" = as.POSIXct(monsites$latest, origin = "1970-01-01"),
+                         "Annual Mean Flow" = monsites$meanannflowval,
                          "Perc diff from mean" = monsites$percdiffmean,
                          "Elevation" = monsites$elevation,
                          "Catchment" = monsites$catchmentname,
@@ -232,7 +235,7 @@ server <- (function(input, output, session) {
   # Put the default map co-ordinates and zoom level into variables
   lat <- -40.542788
   lng <- 176.144708
-  zoom <- 5
+  zoom <- 6
   
   #set the palettes for the circle markers
   pal <- colorNumeric(
@@ -262,10 +265,10 @@ server <- (function(input, output, session) {
     leaflet() %>% 
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
-      addCircleMarkers(data = monsites, popup = ~paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',siteID,'?tab=api">',name,'</a></div><div class="popupbody">Latest measurement: <a href="',resultsetnoangle,'?tab=api">',formatNos(value),'m<sup>3</sup> / sec</a></div><div class="popupbody">The annual mean flow at this site is <a href="',meanannflownoangle,'?tab=api">', formatNos(meanannflowval),' m<sup>3</sup> / sec</a></div>'), color = "#444444", fillColor = ~palFlowDiffMax(percdiffmax), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
-      addLegend("bottomleft", pal = palFlowDiffMax, values = monsites$percdiffmax, opacity = 1)
+      addCircleMarkers(data = monsites, color = "#ffffff",weight = 2, fillColor = ~palFlowDiffMean(percdiffmean), radius=15, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+      addLegend("bottomleft", pal = palFlowDiffMean, values = monsites$percdiffmean, opacity = 1)
       #addPolygons(data = rivers)
-                
+      #altpopup for circle markers - in case we revert to popup on click, this popup has the hyperlinked items: paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',hoversite$siteID,'?tab=api">',hoversite$name,'</a></div><div class="popupbody">Latest measurement: <a href="',hoversite$resultsetnoangle,'?tab=api">',formatNos(hoversite$value),'m<sup>3</sup> / sec</a></div><div class="popupbody">The annual mean flow at this site is <a href="',hoversite$meanannflownoangle,'?tab=api">', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</a></div>')        
     
   })
   
@@ -292,6 +295,8 @@ observe({
     ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() 
   })
   output$stationname <- renderText(paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$name,'</a>'))
+  output$latestreading <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',formatNos(filtmonsites$value),' m<sup>3</sup> / sec</a>'))
+  output$latestdatetime <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',as.POSIXct(filtmonsites$latest, origin='1970-01-01'),'</a>'))
   output$maxflow <- renderText(paste0('<a href="',filtmonsites$maxflownoangle,'?tab=api">',formatNos(filtmonsites$maxflowval),' m<sup>3</sup> / sec</a>'))
   output$meanflow <- renderText(paste0('<a href="',filtmonsites$meanannflownoangle,'?tab=api">',formatNos(filtmonsites$meanannflowval),' m<sup>3</sup> / sec</a>'))
   output$malf <- renderText(paste0('<a href="',filtmonsites$malfnoangle,'?tab=api">',formatNos(filtmonsites$malfval),' m<sup>3</sup> / sec</a>'))
@@ -302,7 +307,6 @@ observe({
   output$geology <-renderText(paste0('<a href="',filtmonsites$geologynoangle,'?tab=api">',filtmonsites$geologylabel,'</a>'))
   output$landcover <-renderText(paste0('<a href="',filtmonsites$landcovernoangle,'?tab=api">',filtmonsites$landcoverlabel,'</a>'))
   chartdatasorted <- chartdata[order(chartdata$date), ]
-  output$latestreading <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',formatNos(filtmonsites$value),' m<sup>3</sup> / sec</a>'))
   latestmeasurement <- last(chartdatasorted$value)
   imgsource <- filtmonsites$image
   output$photo <- renderText({
@@ -317,6 +321,21 @@ observe({
   )
 })
 
+observeEvent(input$map_marker_mouseout$id, {
+  leafletProxy("map") %>% clearPopups()
+})
+
+# When circle is hovered over...show a popup
+observeEvent(input$map_marker_mouseover$id, {
+  radius = 2
+  pointId <- input$map_marker_mouseover$id
+  hoversite = monsites[monsites$sitesub == pointId, lat]
+  latp <- hoversite$lat
+  lngp <- hoversite$long
+  offset = isolate((input$map_bounds$north - input$map_bounds$south) / (23 + radius + (18 - input$map_zoom)^2 ))
+  latoffset <- as.numeric(latp) + offset
+  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),'m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div>'))
+})
 
 
 observe({
