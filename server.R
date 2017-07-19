@@ -28,10 +28,11 @@ WHERE {
 ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
 }
 GROUP BY ?sitesub
-         }
+      }
 ?obs <http://www.w3.org/ns/sosa/resultTime> ?latest .
 ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .  
 ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
+?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
 ?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
 ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
 ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
@@ -55,8 +56,9 @@ OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
 ?reach <http://envdatapoc.co.nz/def/geology> ?geology .
 ?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
 ?climate rdfs:label ?climatelabel.
-?geology rdf:label ?geologylabel.
-?landcover rdfs:label ?landcoverlabel .}
+?geology rdfs:label ?geologylabel.
+?landcover rdfs:label ?landcoverlabel .
+}
 OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
 OPTIONAL {?sitesub <http://schema.org/image> ?image .}
 }"
@@ -140,9 +142,14 @@ OPTIONAL {?sitesub <http://schema.org/image> ?image .}
 # }
 # ORDER BY asc(?siteID)"
 
+formatNos <- function (x) {
+  formatC(x, digits = 2, format = "f", big.mark = ",")
+}
+
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 qd <- SPARQL(endpoint,startquery)
+
 
 
 monsites <- qd$results
@@ -255,7 +262,7 @@ server <- (function(input, output, session) {
     leaflet() %>% 
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
-      addCircleMarkers(data = monsites, popup = ~paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',siteID,'?tab=api">',name,'</a></div><div class="popupbody">Latest measurement: <a href="',resultsetnoangle,'?tab=api">',value,'</a> m<sup>3</sup> / sec</div><div class="popupbody">The annual mean flow at this site is ', meanannflowval,' m <sup>3</sup> / sec</div>'), color = "#444444", fillColor = ~palFlowDiffMax(percdiffmax), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
+      addCircleMarkers(data = monsites, popup = ~paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',siteID,'?tab=api">',name,'</a></div><div class="popupbody">Latest measurement: <a href="',resultsetnoangle,'?tab=api">',formatNos(value),'</a> m<sup>3</sup> / sec</div><div class="popupbody">The annual mean flow at this site is ', formatNos(meanannflowval),' m <sup>3</sup> / sec</div>'), color = "#444444", fillColor = ~palFlowDiffMax(percdiffmax), fillOpacity=0.9, stroke=1,layerId=monsites$sitesub) %>%
       addLegend("bottomleft", pal = palFlowDiffMax, values = monsites$percdiffmax, opacity = 1)
       #addPolygons(data = rivers)
                 
@@ -285,23 +292,23 @@ observe({
     ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() 
   })
   output$stationname <- renderText(paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$name,'</a>'))
-  output$maxflow <- renderText(paste0('<a href="',filtmonsites$maxflownoangle,'?tab=api">',filtmonsites$maxflowval,' m3 / sec</a>'))
-  output$meanflow <- renderText(paste0('<a href="',filtmonsites$meanannflownoangle,'?tab=api">',filtmonsites$meanannflowval,' m3 / sec</a>'))
-  output$malf <- renderText(paste0('<a href="',filtmonsites$malfnoangle,'?tab=api">',filtmonsites$malfval,' m3 / sec</a>'))
-  output$minflow <- renderText(paste0('<a href="',filtmonsites$minflownoangle,'?tab=api">',filtmonsites$minflowval,' m3 / sec</a>'))
-  output$meanfloodflow <- renderText(paste0('<a href="',filtmonsites$meanfloodflownoangle,'?tab=api">',filtmonsites$meanfloodflowval,' m3 / sec</a>'))
-  output$climate <-renderText(paste0('<a href="',filtmonsites$climatenoangle,'">',filtmonsites$climatelabel,'</a>'))
-  output$elevation <-renderText(paste0(filtmonsites$elevation,'m'))
+  output$maxflow <- renderText(paste0('<a href="',filtmonsites$maxflownoangle,'?tab=api">',formatNos(filtmonsites$maxflowval),' m3 / sec</a>'))
+  output$meanflow <- renderText(paste0('<a href="',filtmonsites$meanannflownoangle,'?tab=api">',formatNos(filtmonsites$meanannflowval),' m3 / sec</a>'))
+  output$malf <- renderText(paste0('<a href="',filtmonsites$malfnoangle,'?tab=api">',formatNos(filtmonsites$malfval),' m3 / sec</a>'))
+  output$minflow <- renderText(paste0('<a href="',filtmonsites$minflownoangle,'?tab=api">',formatNos(filtmonsites$minflowval),' m3 / sec</a>'))
+  output$meanfloodflow <- renderText(paste0('<a href="',filtmonsites$meanfloodflownoangle,'?tab=api">',formatNos(filtmonsites$meanfloodflowval),' m3 / sec</a>'))
+  output$climate <-renderText(paste0('<a href="',filtmonsites$climatenoangle,'?tab=api">',filtmonsites$climatelabel,'</a>'))
+  output$elevation <-renderText(paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$elevation,'m</a>'))
   output$geology <-renderText(paste0('<a href="',filtmonsites$geologynoangle,'?tab=api">',filtmonsites$geologylabel,'</a>'))
   output$landcover <-renderText(paste0('<a href="',filtmonsites$landcovernoangle,'?tab=api">',filtmonsites$landcoverlabel,'</a>'))
   chartdatasorted <- chartdata[order(chartdata$date), ]
-  output$latestreading <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',filtmonsites$value,' m3 / sec</a>'))
+  output$latestreading <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',formatNos(filtmonsites$value),' m<sup>3</sup> / sec</a>'))
   latestmeasurement <- last(chartdatasorted$value)
   imgsource <- filtmonsites$image
   output$photo <- renderText({
        c('<img src="',imgsource,'", height=300, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')
     })
-  #output$latestreading <- renderText(paste0(latestmeasurement,' m3 / sec'))
+  #output$latestreading <- renderText(paste0(latestmeasurement,' m3 / sec')1
   output$downloadData <- downloadHandler(
     filename = function() { paste(Sys.time(), '.csv', sep='') },
     content = function(file) {
