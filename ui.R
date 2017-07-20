@@ -9,7 +9,7 @@ library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(ra
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
-           tabPanel("ABOUT",
+           tabPanel("ABOUT THIS TOOL",
                     fluidRow(
                       column(10,
                              div(h5("About this tool")),
@@ -141,6 +141,35 @@ navbarPage("New Zealand River Monitoring", id="nav",
                       column(12,
                              div(h3("Dashboard..!")),
                              div(h4("Possibly coming soon"))
+                      )
+                    )
+           ),
+           tabPanel("ABOUT THIS PROJECT",
+                    fluidRow(
+                      column(10,
+                             div(h3("About this project")),
+                             h4(p("Plain English Summary")),
+                             p("The Ministry, NRS and Regional Sector are developing a data tool to enable people to query real time, linked river level and flow data provided by participating regional councils. The tool will enable people to search and compare data on river levels and flows in the same way the Trivago website enables people to search and compare the price of hotel rooms. 
+                               The main reason for developing the tool is so people can get river data within a few minutes. At the moment people have to email their data requests to data providers and wait around a month for an answer. The data tool is possible because regional councils and the Ministry for the Environment have standardised the way they measure, collect and exchange regional environmental data in New Zealand. 
+                               The Ministry is currently testing the idea to see if it works and aims to show the concept from this website from July. If the regional government sector and the natural resource sector think the concept is useful, the next step will be to develop a larger project to provide access to more data through the tool."),
+                               h4(p("Technical Summary")),
+                               p("The Environmental Integrated Data Infrastructure (architectural proof of concept scoping) project received funding from the Better Public Services Seed Fund, administered by the Treasury. The purpose of this project is to demonstrate the exchange of data between MfE and the other Natural Resource Sector agencies (DIA, DOC, LINZ, MBIE, MPI, STATS) and data supplier organisations such as regional councils. 
+                               The proof of concept will use established technologies, including web technologies, location intelligence, and linked data, to connect different data holdings into a single, seamless, virtual data service.  The data layer will be able to be accessed from current systems, and the proof of concept is complying to data and web standards as much as possible and will also provide an online tool to enable browsing, querying, and accessing the data. The data will continue to be stored and managed by the contributing agencies.
+                               In the first instance, the POC will be demonstrating the brokering of real-time water-related data services (flow) from regional councils, using common vocabularies, and building on the NEMS (National Environmental Monitoring Standards) data exchange protocol (Environmental Observation Data Protocol) developed between NIWA, Landcare, GNS, Horizons and Genesis Energy."),
+                               h4(p("Disclaimer")),
+                               p("Read our disclaimer statement about information on this website. The information on this website is, according to the Ministry for the Environment’s best efforts, accurate at the time of publication and the Ministry makes every reasonable effort to keep it current and accurate. However, visitors to this website are advised that:"),
+                               tags$ul(tags$li("this website is established for the Environmental Integrated Data Infrastructure  Proof of Concept (e-IDI POC) project and is for use during the e-IDI POC project only"),
+                                       tags$li("the information and data provided on this website are for the purposes of the e-IDI POC project only and are not recommended for operational use"),
+                                       tags$li("we recommend that users exercise their own skill and care with respect to their use of this website, and carefully evaluate the accuracy, currency, completeness and relevance of the data on this website for their purposes."),
+                                       tags$li("the information provided does not alter the laws of New Zealand and other official guidelines or requirements"),
+                                       tags$li("visitors to the Ministry for the Environment website should take specific advice from qualified professional people before undertaking any action following information received from this website"),
+                                       tags$li("the Ministry for the Environment does not accept any responsibility or liability whatsoever whether in contract, tort, equity or otherwise for any action taken as a result of reading, or reliance placed on the Ministry for the Environment because of having read, any part, or all, of the information in this website or for any error, or inadequacy, deficiency, flaw in or omission from the information provided in this website"),
+                                       tags$li("all links and references to other websites, organisations or people not within the Ministry for the Environment are provided for convenience only and should not be taken as endorsement of those websites or information contained in those websites nor of organisations or people referred to"),
+                                       tags$li("The Ministry for the Environment also does not impliedly endorse any website, organisation or people who have off-site links to the Ministry for the Environment’s website")),
+                              p("If you find any information on this website that you believe may be inaccurate, please send an email to ", a("webmaster@mfe.govt.nz", href="mailto:webmaster@mfe.govt.nz"),".")
+
+                             
+                             
                       )
                     )
            ),

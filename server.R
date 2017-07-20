@@ -334,7 +334,7 @@ observeEvent(input$map_marker_mouseover$id, {
   lngp <- hoversite$long
   offset = isolate((input$map_bounds$north - input$map_bounds$south) / (23 + radius + (18 - input$map_zoom)^2 ))
   latoffset <- as.numeric(latp) + offset
-  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),'m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div>'))
+  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),'m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div><div>Time of last measurement: ',as.POSIXct(hoversite$latest, origin = "1970-01-01"),'</div>'))
 })
 
 
