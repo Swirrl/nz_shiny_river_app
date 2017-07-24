@@ -94,16 +94,19 @@ monsites$meanannflownoangle <- gsub('^.|.$', '', monsites$meanannflow)
 monsites$meanfloodflownoangle <- gsub('^.|.$', '', monsites$meanfloodflow)
 monsites$resultsetnoangle <- gsub('^.|.$', '', monsites$resultset)
 #monsites <- monsites[which (monsites$mtype == "<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>"), ]
-dtmonsites <- data.frame("Name" = monsites$name,
-                         "Latest" = monsites$value,
-                         "Date/Time" = as.POSIXct(monsites$latest, origin = "1970-01-01"),
-                         "Annual Mean Flow" = monsites$meanannflowval,
-                         "Perc diff from mean" = monsites$percdiffmean,
+
+dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',monsites$siteID,'?tab=api" target="_blank">',monsites$name,'</a>'),
+                         "Latest" = paste0('<a href="',monsites$resultsetnoangle,'?tab=api" target="_blank">',monsites$value,'</a>'),
+                         "Date/Time" = format(as.POSIXct(monsites$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),
+                         "Annual Mean Flow" = round(monsites$meanannflowval, digits = 2),
+                         "Perc diff from mean" = round(monsites$percdiffmean, digits = 2),
                          "Elevation" = monsites$elevation,
                          "Catchment" = monsites$catchmentname,
-                         "Lat" = monsites$lat,
-                         "Long" = monsites$long,
-                         "URI" = monsites$obs)
+                         "Climate" = paste0('<a href="',monsites$climatenoangle,'?tab=api" target="_blank">',monsites$climatelabel,'</a>'),
+                         "Geology" = paste0('<a href="',monsites$geologynoangle,'?tab=api" target="_blank">',monsites$geologylabel,'</a>'),
+                         "Landcover" = paste0('<a href="',monsites$landcovernoangle,'?tab=api" target="_blank">',monsites$landcoverlabel,'</a>'),
+                         "Lat" = round(as.numeric(monsites$lat),digits = 7),
+                         "Long" = round(as.numeric(monsites$long),digits = 7))
 
 query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -158,7 +161,7 @@ server <- (function(input, output, session) {
   
   
   #draw the table in the 'data' tab
-  output$table <- DT::renderDataTable(datatable(dtmonsites, escape = TRUE))
+  output$table <- DT::renderDataTable(datatable(dtmonsites,colnames = c("Site Name", "Latest flow reading","Time of latest reading (yyyy-mm-dd hh:mm:ss)","Annual Mean Flow", "% Between latest and mean", "Elevation","Catchment","Climate","Geology", "Landcover","Lat","Long"), escape = 1))
   
   # Put the default map co-ordinates and zoom level into variables
   lat <- -40.542788
@@ -209,7 +212,7 @@ observe({
   click<-input$map_marker_click
   if(is.null(click))
     return()
-  print(click$id)
+  #print(click$id)
   query3 <- paste0(query3_1,click$id,query3_2)
   #print(query3)
   qd3 <- SPARQL(endpoint,query3)
@@ -244,7 +247,8 @@ observe({
   output$photo <- renderText({
        c('<img src="',imgsource,'", height=300, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')
     })
-  #output$latestreading <- renderText(paste0(latestmeasurement,' m3 / sec')1
+  
+  
   output$downloadData <- downloadHandler(
     filename = function() { paste(Sys.time(), '.csv', sep='') },
     content = function(file) {
@@ -288,15 +292,15 @@ observeEvent(input$refreshchart, {
   rivers <- paste(rivers,sep="", collapse = "','")
   fromdate <- input$datepicker[1]
   todate <- input$datepicker[2]
-  print(as.POSIXct(fromdate))
-  print(as.POSIXct(todate))
-  print(click)
+  #print(as.POSIXct(fromdate))
+  #print(as.POSIXct(todate))
+  #print(click)
   #click <- "Hautapu at Alabasters"
   if(is.null(click))
     return()
-  print(click)
+  #print(click)
   query4 <- paste0(query4_1,fromdate,query4_2,todate,query4_3,rivers,query4_4)
-  print(query4)
+  #print(query4)
   qd4 <- SPARQL(endpoint,query4)
   monsitesmeasuremulti <- qd4$results
   monsitesmeasuremulti$datetimeformatted <- as.POSIXct(monsitesmeasuremulti$datetime, origin = "1970-01-01")
