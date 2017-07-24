@@ -12,8 +12,13 @@ navbarPage("New Zealand River Monitoring", id="nav",
            tabPanel("ABOUT THIS TOOL",
                     fluidRow(
                       column(10,
-                             div(h5("About this tool")),
-                             p("This tool is a demonstration to show that data from different river monitoring sites can be shown in one R-Shiny visualisation.")
+                             div(h3("About this tool")),
+                             p("Welcome to the interactive river sensor explorer. For more information about this project, see the 'About this Project' tab."),
+                             h3("How to use this tool"),
+                             p("This tool has been designed to be fairly intuitive, showing data for river monitoring sites on a map. Clicking a site will show some key statistics for that site - latest reading, mean average flow, etc."),
+                             p("The 'Data' tab contains a filterable, sortable, searchable list of all sites, along with key facts and context about each site."),
+                             p("The 'Chart' tab allows you to view historical data for a site. This chart also has the ability to show multiple sites on the same axes, to support comparisons between sites."),
+                             p("Any text on this site that ",a("appears blue", href = "http://envdatapoc.co.nz/"),(" is a hyperlink. Clicking these links will take you to that thing's page on the PublishMyData platform. This is a more technical view of the data, but does provide more information abut the thing, and can also provide a platform for more advanced queries in the SPARQL endpoint."))
                              
                       )
                     )
@@ -126,9 +131,13 @@ navbarPage("New Zealand River Monitoring", id="nav",
            ),
            tabPanel("CHART",
                     fluidRow(
-                      column(12,
+                      column(4,
                              div(selectInput("sitesel","Select sites:",monsites$name,multiple=TRUE))),
-                      column(6,
+                      column(4,
+                             div(dateRangeInput("datepicker", "Choose date range:", format = "dd M yyyy", startview = "month", weekstart = 0,language = "en", separator = " to "))),
+                      column(4,
+                             div(selectInput("periodsel", "Choose time interval",c("Minutes"),selected = "Minutes"))),
+                      column(12,
                              div(actionButton("refreshchart","Refresh"))),
                       column(12,
                              div(h3("Big Line")),

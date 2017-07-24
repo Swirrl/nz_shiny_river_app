@@ -63,84 +63,7 @@ OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
 OPTIONAL {?sitesub <http://schema.org/image> ?image .}
 }"
 
-#Can probably archive this query, as the 'startquery' does the same thing (i think) but is faster.
-#Query to get all the monitoring sites. Features a subquery to pull out only the most recent measurement for each site
-# newquery <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# SELECT  DISTINCT ?obs ?value ?resultset ?latest ?sitesub ?lat ?long ?siteID ?name ?reach ?elevation ?mgmnt ?catchmentname ?image ?geologylabel ?landcoverlabel ?climatelabel ?malfval ?maxflowval ?minflowval ?meanannflowval ?meanfloodflowval ?climate ?geology ?landcover ?malf ?maxflow ?minflow ?meanannflow ?meanfloodflow
-# WHERE {
-# { SELECT (max(?datetime) AS ?latest) ?sitesub
-# WHERE {
-# ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-# ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
-# ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-# ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-# ?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
-# ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
-# ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?valuesub .
-# OPTIONAL {?sitesub <http://schema.org/image> ?image .}
-# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
-# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
-# ?sitesub rdfs:label ?name .
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/MALF> ?malf .
-# ?malf <http://qudt.org/1.1/schema/qudt#numericValue> ?malfval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/maxRecordedFlow> ?maxflow .
-# ?maxflow <http://qudt.org/1.1/schema/qudt#numericValue> ?maxflowval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFlow> ?meanannflow .
-# ?meanannflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanannflowval . }
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFloodFlow> ?meanfloodflow .
-# ?meanfloodflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanfloodflowval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/minRecordedFlow> ?minflow .
-# ?minflow <http://qudt.org/1.1/schema/qudt#numericValue> ?minflowval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
-# ?catchment rdfs:label ?catchmentname .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
-# ?reach <http://envdatapoc.co.nz/def/climate> ?climate .
-# ?reach <http://envdatapoc.co.nz/def/geology> ?geology .
-# ?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
-# ?climate rdfs:label ?climatelabel.
-# ?geology rdf:label ?geologylabel.
-# ?landcover rdfs:label ?landcoverlabel .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
-# }
-# GROUP BY ?sitesub
-# }
-# ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-# ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
-# ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-# ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-# ?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
-# ?obs <http://www.w3.org/ns/sosa/resultTime> ?latest .
-# ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
-# OPTIONAL {?sitesub <http://schema.org/image> ?image .}
-# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
-# ?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
-# ?sitesub rdfs:label ?name .
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/MALF> ?malf .
-# ?malf <http://qudt.org/1.1/schema/qudt#numericValue> ?malfval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/maxRecordedFlow> ?maxflow .
-# ?maxflow <http://qudt.org/1.1/schema/qudt#numericValue> ?maxflowval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFlow> ?meanannflow .
-# ?meanannflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanannflowval . }
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFloodFlow> ?meanfloodflow .
-# ?meanfloodflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanfloodflowval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/minRecordedFlow> ?minflow .
-# ?minflow <http://qudt.org/1.1/schema/qudt#numericValue> ?minflowval .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
-# ?catchment rdfs:label ?catchmentname .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
-# ?reach <http://envdatapoc.co.nz/def/climate> ?climate .
-# ?reach <http://envdatapoc.co.nz/def/geology> ?geology .
-# ?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
-# ?climate rdfs:label ?climatelabel.
-# ?geology rdf:label ?geologylabel.
-# ?landcover rdfs:label ?landcoverlabel .}
-# OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
-# #filter (?latest = ?datetime  ?sitesub = ?site)
-# }
-# ORDER BY asc(?siteID)"
+
 
 #function that formats numbers
 formatNos <- function (x) {
@@ -206,6 +129,7 @@ query3_2 <- " .
 #This is the query that powers the multi-line chart
 query4_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT ?resultset ?datetime ?value ?name ?type ?reach
 WHERE {
 ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
@@ -217,9 +141,13 @@ WHERE {
 ?site rdfs:label ?name .
 ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
 OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
-FILTER ( ?name IN('"
+FILTER (?datetime > '"
 
-query4_2 <- "'))
+query4_2 <- "'^^xsd:dateTime && ?datetime < '"
+
+query4_3 <- "'^^xsd:dateTime && ?name IN('"
+
+query4_4 <- "'))
 
 }"
 
@@ -352,14 +280,18 @@ observe({
 
 observeEvent(input$refreshchart, {
   
-  click <- input$sitesel
-  click <- paste(click,sep="", collapse = "','")
+  rivers <- input$sitesel
+  rivers <- paste(rivers,sep="", collapse = "','")
+  fromdate <- input$datepicker[1]
+  todate <- input$datepicker[2]
+  print(as.POSIXct(fromdate))
+  print(as.POSIXct(todate))
   print(click)
-  # click <- "63101"
+  #click <- "Hautapu at Alabasters"
   if(is.null(click))
     return()
   print(click)
-  query4 <- paste0(query4_1,click,query4_2)
+  query4 <- paste0(query4_1,fromdate,query4_2,todate,query4_3,rivers,query4_4)
   print(query4)
   qd4 <- SPARQL(endpoint,query4)
   monsitesmeasuremulti <- qd4$results
@@ -371,7 +303,7 @@ observeEvent(input$refreshchart, {
                           "value" = monsitesmeasuremulti$value)
   
   output$plot2_big_line <- renderPlotly({ggplotly(
-    ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.5) + labs(x="Date/Time", y="Flow Volume m3/second")) 
+    ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.1) + labs(x="Date/Time", y="Flow Volume m3/second")) 
   })
   
 })
