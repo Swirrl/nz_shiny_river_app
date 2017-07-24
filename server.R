@@ -231,7 +231,7 @@ observe({
   })
   output$stationname <- renderText(paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$name,'</a>'))
   output$latestreading <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',formatNos(filtmonsites$value),' m<sup>3</sup> / sec</a>'))
-  output$latestdatetime <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',as.POSIXct(filtmonsites$latest, origin='1970-01-01'),'</a>'))
+  output$latestdatetime <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',format(as.POSIXct(filtmonsites$latest, origin='1970-01-01'),"%Y-%m-%d %X"),'</a>'))
   output$maxflow <- renderText(paste0('<a href="',filtmonsites$maxflownoangle,'?tab=api">',formatNos(filtmonsites$maxflowval),' m<sup>3</sup> / sec</a>'))
   output$meanflow <- renderText(paste0('<a href="',filtmonsites$meanannflownoangle,'?tab=api">',formatNos(filtmonsites$meanannflowval),' m<sup>3</sup> / sec</a>'))
   output$malf <- renderText(paste0('<a href="',filtmonsites$malfnoangle,'?tab=api">',formatNos(filtmonsites$malfval),' m<sup>3</sup> / sec</a>'))
@@ -270,7 +270,7 @@ observeEvent(input$map_marker_mouseover$id, {
   lngp <- hoversite$long
   offset = isolate((input$map_bounds$north - input$map_bounds$south) / (23 + radius + (18 - input$map_zoom)^2 ))
   latoffset <- as.numeric(latp) + offset
-  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),' m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div><div>Time of last measurement: ',as.POSIXct(hoversite$latest, origin = "1970-01-01"),'</div>'))
+  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),' m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div><div>Time of last measurement: ',format(as.POSIXct(hoversite$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),'</div>'))
 })
 
 
