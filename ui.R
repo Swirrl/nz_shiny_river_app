@@ -5,9 +5,10 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plyr); library(plotly)
+library(shiny) ; library(plyr); library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(shinycssloaders) ; library(shinysky)
 
 navbarPage("New Zealand River Monitoring", id="nav",
+           
            
            tabPanel("ABOUT THIS TOOL",
                     fluidRow(
@@ -25,6 +26,21 @@ navbarPage("New Zealand River Monitoring", id="nav",
            ),
            tabPanel("MAP",
                     div(class="outer",
+                        tags$style(type="text/css", "
+                                         #loadmessage {
+                                   position: fixed;
+                                   top: 0px;
+                                   left: 0px;
+                                   width: 100%;
+                                   padding: 5px 0px 5px 0px;
+                                   text-align: center;
+                                   font-weight: bold;
+                                   font-size: 100%;
+                                   color: #000000;
+                                   background-color: #c0d6f9;
+                                   z-index: 105;
+                                   }
+                                   "),
                         
                         tags$head(
                           # Include our custom CSS
@@ -32,7 +48,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                           
                           #includeScript("gomap.js")
                         ),
-                        
+                        busyIndicator(wait=1000),
                         leafletOutput("map", width="100%", height="100%"),
                         
                         # Shiny versions prior to 0.11 should use class="modal" instead.
@@ -126,6 +142,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                       column(12,
                              div(h3("Datatable")),
                              DT::dataTableOutput("table")
+                             
                       )
                     )
            ),
@@ -134,13 +151,13 @@ navbarPage("New Zealand River Monitoring", id="nav",
                       column(4,
                              div(selectInput("sitesel","Select sites:",monsites$name,multiple=TRUE))),
                       column(4,
-                             div(dateRangeInput("datepicker", "Choose date range:", format = "dd M yyyy", startview = "month", weekstart = 0,language = "en", separator = " to "))),
+                             div(dateRangeInput("datepicker", "Choose date range:", format = "dd M yyyy", startview = "month",start = "2017-07-01", weekstart = 0,language = "en", separator = " to "))),
                       column(4,
                              div(selectInput("periodsel", "Choose time interval",c("Minutes"),selected = "Minutes"))),
                       column(12,
                              div(actionButton("refreshchart","Refresh"))),
                       column(12,
-                             div(h3("Big Line")),
+                             div(h3("")),
                              plotlyOutput("plot2_big_line", height=600)
                       )
                     )
@@ -184,3 +201,4 @@ navbarPage("New Zealand River Monitoring", id="nav",
            ),
            conditionalPanel("false", icon("crosshair"))
 )
+

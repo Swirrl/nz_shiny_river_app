@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly)
+library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(shinycssloaders)
 
 #To add rivers back in need to uncomment this line and the line adding the polygon to the map
 #rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
@@ -256,6 +256,7 @@ observe({
     }
   )
 })
+
 
 observeEvent(input$map_marker_mouseout$id, {
   leafletProxy("map") %>% clearPopups()
