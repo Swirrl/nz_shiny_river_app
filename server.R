@@ -187,14 +187,18 @@ server <- (function(input, output, session) {
     domain = monsites$percdiffmax
   )
  
+  palFlowDiffMeanDecile <- colorQuantile("Blues", monsites$percdiffmean, n=10)
+  
+  palFlowDiffMeanBin <- colorBin("PiYG", monsites$percdiffmean, 10, pretty = TRUE)
+  
  # Draw the map
   output$map <- renderLeaflet({
     
     leaflet() %>% 
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
-      addCircleMarkers(data = monsites, color = "#ffffff",weight = 2, fillColor = ~palFlowDiffMean(percdiffmean), radius=15, fillOpacity=0.9,layerId=monsites$sitesub) %>%
-      addLegend("bottomleft", pal = palFlowDiffMean, values = monsites$percdiffmean, opacity = 1)
+      addCircleMarkers(data = monsites, color = "#ffffff",weight = 2, fillColor = ~palFlowDiffMeanDecile(percdiffmean), radius=15, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+      addLegend("bottomleft", pal = palFlowDiffMeanDecile, values = monsites$percdiffmean, opacity = 1)
       #addPolygons(data = rivers)
       #altpopup for circle markers - in case we revert to popup on click, this popup has the hyperlinked items: paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',hoversite$siteID,'?tab=api">',hoversite$name,'</a></div><div class="popupbody">Latest measurement: <a href="',hoversite$resultsetnoangle,'?tab=api">',formatNos(hoversite$value),'m<sup>3</sup> / sec</a></div><div class="popupbody">The annual mean flow at this site is <a href="',hoversite$meanannflownoangle,'?tab=api">', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</a></div>')        
     
@@ -262,7 +266,7 @@ observeEvent(input$map_marker_mouseover$id, {
   lngp <- hoversite$long
   offset = isolate((input$map_bounds$north - input$map_bounds$south) / (23 + radius + (18 - input$map_zoom)^2 ))
   latoffset <- as.numeric(latp) + offset
-  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),'m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div><div>Time of last measurement: ',as.POSIXct(hoversite$latest, origin = "1970-01-01"),'</div>'))
+  leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),' m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div><div>Time of last measurement: ',as.POSIXct(hoversite$latest, origin = "1970-01-01"),'</div>'))
 })
 
 
