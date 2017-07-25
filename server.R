@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly)
+library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(classInt)
 
 #To add rivers back in need to uncomment this line and the line adding the polygon to the map
 #rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
@@ -78,6 +78,8 @@ qd <- SPARQL(endpoint,startquery)
 
 monsites <- qd$results
 monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
+
+monsites$percdiffmean2 <- (monsites$value/monsites$meanannflowval)*100
 
 #highlow <- function (x,y) {ifelse ((x > y),'HIGHER','LOWER')}
 
@@ -190,9 +192,18 @@ server <- (function(input, output, session) {
     domain = monsites$percdiffmax
   )
  
-  palFlowDiffMeanDecile <- colorQuantile("Blues", monsites$percdiffmean, n=10)
+  #Hard coded breaks for the binning for markers. Uses librart classIntervals
+  breaks <- classIntervals(monsites$percdiffmean2,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,5000), intervalClosure = 'right')
   
-  palFlowDiffMeanBin <- colorBin("PiYG", monsites$percdiffmean, 10, pretty = TRUE)
+  palFlowDiffMeanDecile <- colorQuantile("Spectral", monsites$percdiffmean, n=5)
+  
+  
+  palFlowDiffMeanBin <- colorBin("Spectral", domain = breaks$brks, bins = breaks$brks, pretty = FALSE, na.color = rgb(1,1,1,0.5))
+  
+  palFlowDiffMeanBinSimple <- colorBin("Spectral", domain = c(-5000,5000),4, pretty = FALSE)
+  
+  
+  print(breaks)
   
  # Draw the map
   output$map <- renderLeaflet({
@@ -200,8 +211,8 @@ server <- (function(input, output, session) {
     leaflet() %>% 
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
-      addCircleMarkers(data = monsites, color = "#ffffff",weight = 2, fillColor = ~palFlowDiffMeanDecile(percdiffmean), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
-      addLegend("bottomleft", pal = palFlowDiffMeanDecile, values = monsites$percdiffmean, opacity = 1)
+      addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean2), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+      addLegend("bottomleft",title="Current flow as % of annual mean flow", pal = palFlowDiffMeanBin, values = monsites$percdiffmean2, opacity = 1)
       #addPolygons(data = rivers)
       #altpopup for circle markers - in case we revert to popup on click, this popup has the hyperlinked items: paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',hoversite$siteID,'?tab=api">',hoversite$name,'</a></div><div class="popupbody">Latest measurement: <a href="',hoversite$resultsetnoangle,'?tab=api">',formatNos(hoversite$value),'m<sup>3</sup> / sec</a></div><div class="popupbody">The annual mean flow at this site is <a href="',hoversite$meanannflownoangle,'?tab=api">', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</a></div>')        
     

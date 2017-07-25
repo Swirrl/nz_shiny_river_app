@@ -27,22 +27,6 @@ navbarPage("New Zealand River Monitoring", id="nav",
            ),
            tabPanel("MAP",
                     div(class="outer",
-                        tags$style(type="text/css", "
-                                         #loadmessage {
-                                   position: fixed;
-                                   top: 0px;
-                                   left: 0px;
-                                   width: 100%;
-                                   padding: 5px 0px 5px 0px;
-                                   text-align: center;
-                                   font-weight: bold;
-                                   font-size: 100%;
-                                   color: #000000;
-                                   background-color: #c0d6f9;
-                                   z-index: 105;
-                                   }
-                                   "),
-                        
                         tags$head(
                           # Include our custom CSS
                           includeCSS("styles.css")
@@ -55,7 +39,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                         absolutePanel(id = "controls",style = " height: 120vh; overflow-y: auto; ", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
                                       width = 450, height = 900,
-                                      radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr'),
+                                      radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = TRUE),
                                       h2("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),
                                       tags$head(tags$style(".popupbody{
@@ -85,8 +69,6 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                                 ),
                                       plotOutput("plot1", height=200, width=400
                                                  ),
-                                      #p("",style="color:green;font-size:16px"),('Mean Annual Flow'),
-                                      br(),
                                       div(downloadButton('downloadData', 'Download the data')),
                                       br(),
                                       p("Latest reading: ",style="display:inline"), htmlOutput('latestreading'),
