@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(plyr); library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(shinycssloaders) ; library(shinysky)
+library(shiny) ; library(plyr); library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly)
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
@@ -49,7 +49,6 @@ navbarPage("New Zealand River Monitoring", id="nav",
                           
                           #includeScript("gomap.js")
                         ),
-                        busyIndicator(wait=1000),
                         leafletOutput("map", width="100%", height="100%"),
                         
                         # Shiny versions prior to 0.11 should use class="modal" instead.
@@ -61,76 +60,60 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       htmlOutput("stationname"),
                                       tags$head(tags$style(".popupbody{
                                             font-weight: bold;
-                                            font-size: 16px;
+                                            font-size: 12px;
                                             }"
                                               )
                                       ),
                                       tags$head(tags$style(".popuptitle{
                                             font-weight: bold;
-                                                           font-size: 24px;
+                                                           font-size: 18px;
                                                            }"
                                               )
                                       ),
                                       tags$head(tags$style("#stationname{color: #222222;
-                                                                        font-size: 24px;
+                                                                        font-size: 18px;
                                                                         font-weight: bold;
                                                                         }"
                                                           )
                                                 ),
                                       tags$head(tags$style("#latestdatetime,#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
-                                                                        font-size: 26px;
+                                                                        font-size: 16px;
                                                                         font-weight: bold;
                                                                         display:inline;
                                                                        }"
                                                           )
                                                 ),
-                    
-                                    
-                                      
-                                      
-                                      
-                                      #sliderInput("paygaprange", "Choose the range of values you would like to display", min = -5000, max = 20000, value = c(-5000,20000)),
-                                      #numericInput("lower", "Filter values between", value= -5000),
-                                      #numericInput("upper", "and", value=20000),
                                       plotOutput("plot1", height=200, width=400,
                                                  click = clickOpts(
                                                    id = "plot_click"
                                                  )),
                                       div(downloadButton('downloadData', 'Download the data')),
-                                      p(h3("Latest reading: ",style="display:inline"), htmlOutput('latestreading')),
-                                      p(h3("Date/time of reading: ",style="display:inline"), htmlOutput('latestdatetime')),
-                                      p(h3("Mean annual flow: ",style="display:inline"), htmlOutput('meanflow')),
-                                      p(h3("Min flow: ",style="display:inline"), htmlOutput('minflow')),
-                                      p(h3("Max flow: ",style="display:inline"), htmlOutput('maxflow')),
-                                      p(h3("MALF: ",style="display:inline"), htmlOutput('malf')),
-                                      p(h3("Mean annual flood flow: ",style="display:inline"), htmlOutput('meanfloodflow')),
-                                      p(h3("Landcover: ",style="display:inline"), htmlOutput('landcover')),
-                                      p(h3("Climate: ",style="display:inline"), htmlOutput('climate')),
-                                      p(h3("Elevation: ",style="display:inline"), htmlOutput('elevation')),
-                                      p(h3("Geology: ",style="display:inline"), htmlOutput('geology')),
-                                      htmlOutput(("photo"), align = 'center'),
-                                      textOutput("click_scatter"),
-                                      #DT::dataTableOutput("areastats"),
-                                      htmlOutput("areastatbox")
-                                      #parking this for now - arranging two chart elements side-by-side
-                                      #fluidRow(
-                                      #  column(6,plotOutput("plot1"))#,
-                                      #  column(6,plotOutput("plot2"))
-                                      #)
+                                      p("Latest reading: ",style="display:inline"), htmlOutput('latestreading'),
+                                      br(),
+                                      p("Date/time of reading: ",style="display:inline"), htmlOutput('latestdatetime'),
+                                      br(),
+                                      p("Mean annual flow: ",style="display:inline"), htmlOutput('meanflow'),
+                                      br(),
+                                      p("Min flow: ",style="display:inline"), htmlOutput('minflow'),
+                                      br(),
+                                      p("Max flow: ",style="display:inline"), htmlOutput('maxflow'),
+                                      br(),
+                                      p("MALF: ",style="display:inline"), htmlOutput('malf'),
+                                      br(),
+                                      p("Mean annual flood flow: ",style="display:inline"), htmlOutput('meanfloodflow'),
+                                      br(),
+                                      p("Landcover: ",style="display:inline"), htmlOutput('landcover'),
+                                      br(),
+                                      p("Climate: ",style="display:inline"), htmlOutput('climate'),
+                                      br(),
+                                      p("Elevation: ",style="display:inline"), htmlOutput('elevation'),
+                                      br(),
+                                      p("Geology: ",style="display:inline"), htmlOutput('geology'),
+                                      br(),
+                                      br(),
+                                      htmlOutput(("photo"), align = 'center')
                                       
-                                      
-                                      
-                                      
-                                      #selectInput("color", "Color", vars),
-                                      #selectInput("size", "Size", vars, selected = "adultpop"),
-                                      # conditionalPanel("input.color == 'superzip' || input.size == 'superzip'",
-                                      #                  # Only prompt for threshold when coloring or sizing by superzip
-                                      #                  numericInput("threshold", "SuperZIP threshold (top n percentile)", 5)
-                                      # ),
-                                      
-                                      #plotOutput("histCentile", height = 200),
-                                      #plotOutput("scatterCollegeIncome", height = 250)
-                        ),
+                                  ),
                         
                         tags$div(id="cite",
                                  'Data compiled for: ', tags$em('New Zealand Ministry of Environment'), ' Swirrl (2017).'
