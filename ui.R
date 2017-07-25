@@ -14,12 +14,13 @@ navbarPage("New Zealand River Monitoring", id="nav",
                     fluidRow(
                       column(10,
                              div(h3("About this tool")),
-                             p("Welcome to the interactive river sensor explorer. For more information about this project, see the 'About this Project' tab."),
+                             p("Welcome to the interactive river flow data explorer. This is a proof of concept for the New Zealand Environmental Integrated Data Infrastructure Project. For more information, see the 'About this Project' tab."),
                              h3("How to use this tool"),
-                             p("This tool has been designed to be fairly intuitive, showing data for river monitoring sites on a map. Clicking a site will show some key statistics for that site - latest reading, mean average flow, etc."),
+                             p("The tool shows river monitoring sites on a map, coloured according to how the current flow rate compares with the average flow rate at that site. Click on a site to load further details, including a time series chart of flow at that site."),
                              p("The 'Data' tab contains a filterable, sortable, searchable list of all sites, along with key facts and context about each site."),
                              p("The 'Chart' tab allows you to view historical data for a site. This chart also has the ability to show multiple sites on the same axes, to support comparisons between sites."),
-                             p("Any text on this site that ",a("appears blue", href = "http://envdatapoc.co.nz/"),(" is a hyperlink. Clicking these links will take you to that thing's page on the PublishMyData platform. This is a more technical view of the data, but does provide more information abut the thing, and can also provide a platform for more advanced queries in the SPARQL endpoint."))
+                             p("Any text on this site that ",a("appears blue", href = "http://envdatapoc.co.nz/"),(" is a hyperlink. Clicking these links will take you to that thing's page on the PublishMyData platform. This is a more technical view of the data, but does provide more information abut the thing, and can also provide a platform for more advanced queries in the SPARQL endpoint."),
+                             p("The data is licensed as CC-BY-4.0 international."))
                              
                       )
                     )
@@ -159,14 +160,6 @@ navbarPage("New Zealand River Monitoring", id="nav",
                       column(12,
                              div(h3("")),
                              plotlyOutput("plot2_big_line", height=600)
-                      )
-                    )
-           ),
-           tabPanel("DASHBOARD",
-                    fluidRow(
-                      column(12,
-                             div(h3("Dashboard..!")),
-                             div(h4("Possibly coming soon"))
                       )
                     )
            ),
