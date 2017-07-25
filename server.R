@@ -218,20 +218,20 @@ observe({
   qd3 <- SPARQL(endpoint,query3)
   monsitesmeasure <- qd3$results
   monsitesmeasure$datetimeformatted <- as.POSIXct(monsitesmeasure$datetime, origin = "1970-01-01")
-  monsitesflow <- monsitesmeasure[ which(monsitesmeasure$type == '<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>'),]
+  #monsitesflow <- monsitesmeasure[ which(monsitesmeasure$type == '<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>'),]
   filtmonsites <- monsites[ which(monsites$sitesub==click$id), ]
-  chartdata <- data.frame("site" = monsitesflow$name,
-                          "date" = monsitesflow$datetimeformatted,
-                          "value" = monsitesflow$value)
-  dlchartdata <- data.frame("site" = monsitesflow$name,
-                          "date" = monsitesflow$datetimeformatted,
-                          "Flow m3 per s)" = monsitesflow$value)
+  chartdata <- data.frame("site" = monsitesmeasure$name,
+                          "date" = monsitesmeasure$datetimeformatted,
+                          "value" = monsitesmeasure$value)
+  dlchartdata <- data.frame("site" = monsitesmeasure$name,
+                          "date" = monsitesmeasure$datetimeformatted,
+                          "Flow m3 per s)" = monsitesmeasure$value)
   output$plot1 <- renderPlot({
-    ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() + labs(x="Date/Time", y="Flow Volume m3/second")
+    ggplot(data=chartdata, aes(x=date, y=value, colour="Current")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position="bottom",legend.title=element_blank()) + geom_line() + labs(x="Date/Time", y="Flow Volume m3/second") + geom_hline(aes(yintercept = filtmonsites$meanannflowval, linetype="Mean Annual Flow"), color = "green") + scale_linetype_manual(name="",values=c(2) ,guide = guide_legend(override.aes = list(color = c("green"))))
   })
-  output$plot2_big_line <- renderPlotly({ggplotly(
-    ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() + labs(x="Date/Time", y="Flow Volume m3/second")
-  )})
+  # output$plot2_big_line <- renderPlotly({ggplotly(
+  #   ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() + labs(x="Date/Time", y="Flow Volume m3/second")
+  # )})
   output$stationname <- renderText(paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$name,'</a>'))
   output$latestreading <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',formatNos(filtmonsites$value),' m<sup>3</sup> / sec</a>'))
   output$latestdatetime <- renderText(paste0('<a href="',filtmonsites$resultsetnoangle,'?tab=api">',format(as.POSIXct(filtmonsites$latest, origin='1970-01-01'),"%Y-%m-%d %X"),'</a>'))
@@ -244,8 +244,8 @@ observe({
   output$elevation <-renderText(paste0(ifelse(is.na(filtmonsites$elevation),'Not available',paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$elevation,'m</a>'))))
   output$geology <-renderText(paste0(ifelse(is.na(filtmonsites$geologylabel),'Not available',paste0('<a href="',filtmonsites$geologynoangle,'?tab=api">',filtmonsites$geologylabel,'</a>'))))
   output$landcover <-renderText(paste0(ifelse(is.na(filtmonsites$landcover),'Not available',paste0('<a href="',filtmonsites$landcovernoangle,'?tab=api">',filtmonsites$landcoverlabel,'</a>'))))
-  chartdatasorted <- chartdata[order(chartdata$date), ]
-  latestmeasurement <- last(chartdatasorted$value)
+  #chartdatasorted <- chartdata[order(chartdata$date), ]
+  #latestmeasurement <- last(chartdatasorted$value)
   imgsource <- filtmonsites$image
   output$photo <- renderText({
        c('<img src="',imgsource,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')

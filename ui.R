@@ -83,11 +83,12 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                                                        }"
                                                           )
                                                 ),
-                                      plotOutput("plot1", height=200, width=400,
-                                                 click = clickOpts(
-                                                   id = "plot_click"
-                                                 )),
+                                      plotOutput("plot1", height=200, width=400
+                                                 ),
+                                      #p("",style="color:green;font-size:16px"),('Mean Annual Flow'),
+                                      br(),
                                       div(downloadButton('downloadData', 'Download the data')),
+                                      br(),
                                       p("Latest reading: ",style="display:inline"), htmlOutput('latestreading'),
                                       br(),
                                       p("Date/time of reading: ",style="display:inline"), htmlOutput('latestdatetime'),
