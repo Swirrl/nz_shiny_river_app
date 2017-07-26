@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(classInt)
+library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(classInt) ; library(grDevices)
 
 #To add rivers back in need to uncomment this line and the line adding the polygon to the map
 #rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
@@ -177,7 +177,7 @@ server <- (function(input, output, session) {
   
   pal2 <-colorFactor(
     palette = "Set1",
-    domain = monsites$reach)
+    domain = monsites$geologylabel)
   
   palFlow <- colorNumeric(
     palette = "PiYG",
@@ -192,18 +192,16 @@ server <- (function(input, output, session) {
     domain = monsites$percdiffmax
   )
  
-  #Hard coded breaks for the binning for markers. Uses librart classIntervals
+  #Hard coded breaks for the binning for markers. Uses library classIntervals
   breaks <- classIntervals(monsites$percdiffmean2,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,5000), intervalClosure = 'right')
   
+  
+  palFlowDiffMeanBin <- colorBin("Spectral", domain = breaks$brks, bins = breaks$brks, pretty = FALSE, na.color = '#dddddd')
+  
+  #Alternative binning stuff - can probably get rid of these
   palFlowDiffMeanDecile <- colorQuantile("Spectral", monsites$percdiffmean, n=5)
-  
-  
-  palFlowDiffMeanBin <- colorBin("Spectral", domain = breaks$brks, bins = breaks$brks, pretty = FALSE, na.color = rgb(1,1,1,0.5))
-  
   palFlowDiffMeanBinSimple <- colorBin("Spectral", domain = c(-5000,5000),4, pretty = FALSE)
-  
-  
-  print(breaks)
+  ######
   
  # Draw the map
   output$map <- renderLeaflet({
@@ -220,7 +218,8 @@ server <- (function(input, output, session) {
   
   # Introduce the click event so that when a marker is clicked on, it changes the content in the sidebar
 observe({
-  click<-input$map_marker_click
+  withProgress(message = "Thinking...",detail = 'Getting and calculating data', min=0, max = 10, value = 8, style='old', { #This adds the progress bar
+    click<-input$map_marker_click
   if(is.null(click))
     return()
   #print(click$id)
@@ -269,6 +268,7 @@ observe({
       write.csv(dlchartdata, file)
     }
   )
+  })
 })
 
 
@@ -303,6 +303,9 @@ observe({
 
 observeEvent(input$refreshchart, {
   
+  withProgress(message = 'Thinking...', detail = 'Getting and calculating data', min =0, max = 10, value = 8, 
+  {
+  output$nodata <- renderText("<p></p>")
   rivers <- input$sitesel
   rivers <- paste(rivers,sep="", collapse = "','")
   fromdate <- input$datepicker[1]
@@ -311,13 +314,19 @@ observeEvent(input$refreshchart, {
   #print(as.POSIXct(todate))
   #print(click)
   #click <- "Hautapu at Alabasters"
-  if(is.null(click))
-    return()
+  
   #print(click)
   query4 <- paste0(query4_1,fromdate,query4_2,todate,query4_3,rivers,query4_4)
   #print(query4)
   qd4 <- SPARQL(endpoint,query4)
   monsitesmeasuremulti <- qd4$results
+  if(nrow(monsitesmeasuremulti)==0) {
+    output$nodata <- renderText('<p style = "font-style:italic"><strong>There is no data matching the search criteria that you specified</strong></p>')
+    df <- data.frame()
+    output$plot2_big_line <- renderPlotly({ggplotly(
+       ggplot(df) + geom_point() + xlim(0, 10) + ylim(0, 100) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"))
+     )})
+    return() } 
   monsitesmeasuremulti$datetimeformatted <- as.POSIXct(monsitesmeasuremulti$datetime, origin = "1970-01-01")
   # monsitesflow <- monsitesmeasure[ which(monsitesmeasure$type == '<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>'),]
   # filtmonsites <- monsites[ which(monsites$sitesub==click$id), ]
@@ -328,7 +337,7 @@ observeEvent(input$refreshchart, {
   output$plot2_big_line <- renderPlotly({ggplotly(
     ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.1) + labs(x="Date/Time", y="Flow Volume m3/second")) 
   })
-  
+  })
 })
 
 })

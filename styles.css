@@ -2,6 +2,18 @@ input[type="number"] {
   max-width: 80%;
 }
 
+.shiny-progress {
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -100px !important;
+  margin-left: -250px !important;
+  height: 200px;
+  color: red;
+  font-size: 20px;
+  font-style: italic;
+  
+}
+
 div.outer {
   position: fixed;
   top: 41px;

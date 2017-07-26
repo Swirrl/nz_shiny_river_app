@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(plyr); library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly)
+library(shiny) ; library(plyr); library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(grDevices)
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
@@ -27,6 +27,16 @@ navbarPage("New Zealand River Monitoring", id="nav",
            ),
            tabPanel("MAP",
                     div(class="outer",
+                        # tags$head(tags$style(".shiny-progress-container {
+                        #   top: 50% !important;
+                        #   left: 50% !important;
+                        #   margin-top: -100px !important;
+                        #   margin-left: -250px !important; 
+                        #   color: blue;
+                        #   font-size: 20px;
+                        #   font-style: italic;
+                        #   
+                        # }")),
                         tags$head(
                           # Include our custom CSS
                           includeCSS("styles.css")
@@ -123,6 +133,8 @@ navbarPage("New Zealand River Monitoring", id="nav",
                              div(selectInput("periodsel", "Choose time interval",c("Minutes"),selected = "Minutes"))),
                       column(12,
                              div(actionButton("refreshchart","Refresh"))),
+                      column(12,
+                            div(htmlOutput('nodata'))),
                       column(12,
                              div(h3("")),
                              plotlyOutput("plot2_big_line", height=600)
