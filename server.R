@@ -256,11 +256,18 @@ observe({
   output$landcover <-renderText(paste0(ifelse(is.na(filtmonsites$landcover),'Not available',paste0('<a href="',filtmonsites$landcovernoangle,'?tab=api">',filtmonsites$landcoverlabel,'</a>'))))
   #chartdatasorted <- chartdata[order(chartdata$date), ]
   #latestmeasurement <- last(chartdatasorted$value)
-  imgsource <- filtmonsites$image
-  output$photo <- renderText({
-       c('<img src="',imgsource,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')
-    })
   
+  imgurl <- filtmonsites$image
+  image <- ifelse((is.na(imgurl)),paste0('<p></p>'),paste0('<img src="',imgurl,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')) 
+  
+  output$photo <- renderText(image)
+  
+  #imgsource <- filtmonsites$image
+  
+  # output$photo <- ifelse((imgsource=='NA'),renderText("<div></div>"),renderText({
+  #      c('<img src="',imgsource,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')
+  #   }))
+
   
   output$downloadData <- downloadHandler(
     filename = function() { paste(Sys.time(), '.csv', sep='') },

@@ -46,11 +46,11 @@ navbarPage("New Zealand River Monitoring", id="nav",
                         leafletOutput("map", width="100%", height="100%"),
                         
                         # Shiny versions prior to 0.11 should use class="modal" instead.
-                        absolutePanel(id = "controls",style = " height: 120vh; overflow-y: auto; ", class = "panel panel-default", fixed = TRUE,
+                        absolutePanel(id = "controls",style = " overflow-y: auto; ", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
-                                      width = 450, height = 900,
+                                      width = 450, height = "90%",
                                       radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = TRUE),
-                                      h2("River Flow Monitoring Stations"),
+                                      h4("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),
                                       tags$head(tags$style(".popupbody{
                                             font-weight: bold;
@@ -137,7 +137,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                             div(htmlOutput('nodata'))),
                       column(12,
                              div(h3("")),
-                             plotlyOutput("plot2_big_line", height=600)
+                             plotlyOutput("plot2_big_line", height=400)
                       )
                     )
            ),
