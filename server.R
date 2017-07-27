@@ -218,7 +218,7 @@ server <- (function(input, output, session) {
   
   # Introduce the click event so that when a marker is clicked on, it changes the content in the sidebar
 observe({
-  withProgress(message = "Thinking...",detail = 'Getting and calculating data', min=0, max = 10, value = 8, style='old', { #This adds the progress bar
+  withProgress(message = "Please wait - getting data.",detail = 'This may take several seconds...', min=0, max = 10, value = 8, { #This adds the progress bar
     click<-input$map_marker_click
   if(is.null(click))
     return()
@@ -303,7 +303,7 @@ observe({
 
 observeEvent(input$refreshchart, {
   
-  withProgress(message = 'Thinking...', detail = 'Getting and calculating data', min =0, max = 10, value = 8, 
+  withProgress(message = "Please wait - getting data.",detail = 'This may take several seconds...',
   {
   output$nodata <- renderText("<p></p>")
   rivers <- input$sitesel
