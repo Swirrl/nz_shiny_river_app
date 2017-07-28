@@ -48,7 +48,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                         # Shiny versions prior to 0.11 should use class="modal" instead.
                         absolutePanel(id = "controls",style = " overflow-y: auto; ", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
-                                      width = 450, height = "90%",
+                                      width = 450, height = "80%",
                                       radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = TRUE),
                                       h4("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),

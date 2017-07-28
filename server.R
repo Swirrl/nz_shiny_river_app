@@ -160,7 +160,7 @@ provtiles = 'Esri.WorldStreetMap'
 
 server <- (function(input, output, session) {
   
-  
+  source('global.R', local=TRUE)
   
   #draw the table in the 'data' tab
   output$table <- DT::renderDataTable(datatable(dtmonsites,colnames = c("Site Name", "Latest flow reading","Time of latest reading (yyyy-mm-dd hh:mm:ss)","Annual Mean Flow", "% Between latest and mean", "Elevation","Catchment","Climate","Geology", "Landcover","Lat","Long"), escape = 1))
