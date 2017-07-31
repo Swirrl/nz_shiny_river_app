@@ -118,7 +118,8 @@ navbarPage("New Zealand River Monitoring", id="nav",
                     fluidRow(
                       column(12,
                              div(h3("Datatable")),
-                             DT::dataTableOutput("table")
+                             DT::dataTableOutput("table"),
+                             div(downloadButton('downloadData1', 'Download the data'))
                              
                       )
                     )
@@ -137,7 +138,8 @@ navbarPage("New Zealand River Monitoring", id="nav",
                             div(htmlOutput('nodata'))),
                       column(12,
                              div(h3("")),
-                             plotlyOutput("plot2_big_line", height=400)
+                             plotlyOutput("plot2_big_line", height=400),
+                             div(downloadButton('downloadData2', 'Download the data'))
                       )
                     )
            ),

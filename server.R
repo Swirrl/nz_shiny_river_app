@@ -110,6 +110,26 @@ dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/m
                          "Lat" = round(as.numeric(monsites$lat),digits = 7),
                          "Long" = round(as.numeric(monsites$long),digits = 7))
 
+
+#Site data formatted sloghtly better for download
+dlmonsites <- data.frame("siteID" = monsites$siteID,
+                         "site_name" = monsites$name,
+                         "latest_result_time" = format(as.POSIXct(monsites$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),
+                         "latest_flow_value" = monsites$value,
+                         "max_flow_value" = monsites$maxflowval,
+                         "mean_annual_flow_value" = monsites$meanannflowval,
+                         "mean_flood_flow_value" = monsites$meanfloodflowval,
+                         "malf_value" = monsites$malfval,
+                         "min_flow_val" = monsites$minflowval,
+                         "catchment" = monsites$catchmentname,
+                         "climate" = monsites$climatelabel,
+                         "geology" = monsites$geologylabel,
+                         "landcover" = monsites$landcoverlabel,
+                         "elevation" = monsites$elevation,
+                         "lat" = monsites$lat,
+                         "long" = monsites$long
+)
+
 query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?resultset ?datetime ?value ?name ?type ?reach
@@ -216,6 +236,14 @@ server <- (function(input, output, session) {
     
   })
   
+  output$downloadData1 <- downloadHandler(
+    
+    filename = function() { paste(Sys.time(), '.csv', sep='') },
+    content = function(file) {
+      write.csv(dlmonsites, file)
+    }
+  )
+  
   # Introduce the click event so that when a marker is clicked on, it changes the content in the sidebar
 observe({
   withProgress(message = "Please wait - getting data.",detail = 'This may take several seconds...', min=0, max = 10, value = 8, { #This adds the progress bar
@@ -275,6 +303,7 @@ observe({
       write.csv(dlchartdata, file)
     }
   )
+  
   })
 })
 
@@ -344,6 +373,15 @@ observeEvent(input$refreshchart, {
   output$plot2_big_line <- renderPlotly({ggplotly(
     ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.1) + labs(x="Date/Time", y="Flow Volume m3/second")) 
   })
+  
+  output$downloadData2<- downloadHandler(
+    filename = function() { paste(Sys.time(), '.csv', sep='') },
+    content = function(file) {
+      write.csv(chartdatamulti, file)
+    }
+  )
+  
+  
   })
 })
 
