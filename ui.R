@@ -50,6 +50,8 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
                                       width = 450, height = "80%",
                                       radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = TRUE),
+                                      radioButtons('markercolour', 'Marker Colours', choices = c('Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Elevation' = 'elevation', 'Geology' = 'geology', 'Climate' = 'climate', 'Landcover' = 'landcover'), selected = 'percmean', inline=TRUE),
+                                      radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Elevation' = 'elevation'), selected = 'percmean', inline=TRUE),
                                       h4("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),
                                       tags$head(tags$style(".popupbody{

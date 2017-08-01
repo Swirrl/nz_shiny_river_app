@@ -13,7 +13,7 @@ library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leafl
 #endpoint <- "http://envdatapoc.co.nz/sparql"
 endpoint <- "http://guest:eidipoc@envdatapoc.co.nz/sparql"
 
-#This endpoint is the drafter one, with no authentication or 
+#This endpoint is the drafter one, with no authentication or
 #endpoint <- "https://production-drafter-nz.publishmydata.com/v1/sparql/live"
 
 startquery <-  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -30,7 +30,7 @@ WHERE {
 GROUP BY ?sitesub
       }
 ?obs <http://www.w3.org/ns/sosa/resultTime> ?latest .
-?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .  
+?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
 ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
 ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
 ?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
@@ -77,13 +77,12 @@ qd <- SPARQL(endpoint,startquery)
 
 
 monsites <- qd$results
-monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
 
-monsites$percdiffmean2 <- (monsites$value/monsites$meanannflowval)*100
+#this is unnecessarily complicated - keeping in comments for now
+#monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
 
-#highlow <- function (x,y) {ifelse ((x > y),'HIGHER','LOWER')}
-
-monsites$percdiffmax <- (monsites$value - monsites$maxflowval)*100
+monsites$percdiffmean <- (monsites$value/monsites$meanannflowval)*100
+monsites$percdiffmax <- (monsites$value/monsites$maxflowval)*100
 monsites$obsnoangle <- gsub('^.|.$', '', monsites$obs)
 monsites$sitesubnoangle <- gsub('^.|.$', '', monsites$sitesub)
 monsites$maxflownoangle <- gsub('^.|.$', '', monsites$maxflow)
@@ -137,18 +136,18 @@ SELECT ?resultset ?datetime ?value ?name ?type ?reach
     ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
     ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?site .
     ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-    ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> " 
+    ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> "
 
 query3_2 <- " .
-    
+
     ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
     ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
     ?obs <http://www.w3.org/ns/sosa/observedProperty> ?type .
     ?site rdfs:label ?name .
     ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
     OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
-    
-    
+
+
   }"
 
 #This is the query that powers the multi-line chart
@@ -190,38 +189,42 @@ server <- (function(input, output, session) {
   lng <- 176.144708
   zoom <- 6
   
-  #set the palettes for the circle markers
-  pal <- colorNumeric(
-    palette = "Blues",
-    domain = monsites$elevation)
   
-  pal2 <-colorFactor(
-    palette = "Set1",
-    domain = monsites$geologylabel)
-  
-  palFlow <- colorNumeric(
-    palette = "PiYG",
-    domain = monsites$value
-  )
-  palFlowDiffMean <- colorNumeric(
-    palette = "PiYG",
-    domain = monsites$percdiffmean
-  )
-  palFlowDiffMax <- colorNumeric(
-    palette = "PiYG",
-    domain = monsites$percdiffmax
-  )
- 
   #Hard coded breaks for the binning for markers. Uses library classIntervals
-  breaks <- classIntervals(monsites$percdiffmean2,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,5000), intervalClosure = 'right')
   
+  #percentage difference from the mean
+  breakspercdiffmean <- classIntervals(monsites$percdiffmean,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,5000), intervalClosure = 'right')
+  palFlowDiffMeanBin <- colorBin("Spectral", domain = breakspercdiffmean$brks, bins = breakspercdiffmean$brks, pretty = FALSE, na.color = '#dddddd')
   
-  palFlowDiffMeanBin <- colorBin("Spectral", domain = breaks$brks, bins = breaks$brks, pretty = FALSE, na.color = '#dddddd')
+  #percentage difference from the max
+  breakspercdiffmax <- classIntervals(monsites$percdiffmax,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,10000), intervalClosure = 'right')
+  palFlowDiffMaxBin <- colorBin("Spectral", domain = breakspercdiffmax$brks, bins = breakspercdiffmax$brks, pretty = FALSE, na.color = '#dddddd')
   
-  #Alternative binning stuff - can probably get rid of these
-  palFlowDiffMeanDecile <- colorQuantile("Spectral", monsites$percdiffmean, n=5)
-  palFlowDiffMeanBinSimple <- colorBin("Spectral", domain = c(-5000,5000),4, pretty = FALSE)
-  ######
+  #elevation
+  palElevation <- colorNumeric(palette = "Spectral",domain = monsites$elevation)
+  
+  #geology
+  palGeology <-colorFactor(palette = "Set1",domain = monsites$geologylabel)
+  
+  #climate
+  palClimate <-colorFactor(palette = "Set1",domain = monsites$climatelabel)
+  
+  #landcover
+  palLandcover <-colorFactor(palette = "Set1",domain = monsites$landcoverlabel)
+  
+  #Just the flow
+  palFlow <- colorNumeric(palette = "Spectral",domain = monsites$value)
+  
+  #Just the meanflow
+  palMeanFlow <- colorNumeric(palette = "Spectral",domain = monsites$meanannflowval)
+  
+  #Just the maxflow
+  palMaxFlow <- colorNumeric(palette = "Spectral",domain = monsites$maxflowval)
+  
+  #Alternative binning stuff - can probably get rid of these, but they worked and might be useful for THE FUTURE
+  #palFlowDiffMeanDecile <- colorQuantile("Spectral", monsites$percdiffmean, n=5)
+  #palFlowDiffMeanBinSimple <- colorBin("Spectral", domain = c(-5000,5000),4, pretty = FALSE)
+  
   
  # Draw the map
   output$map <- renderLeaflet({
@@ -229,8 +232,8 @@ server <- (function(input, output, session) {
     leaflet() %>% 
       addProviderTiles(provtiles) %>% 
       setView(lat = lat, lng = lng, zoom = zoom) %>%
-      addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean2), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
-      addLegend("bottomleft",title="Current flow as % of annual mean flow", pal = palFlowDiffMeanBin, values = monsites$percdiffmean2, opacity = 1)
+      addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+      addLegend("bottomleft",title="Current flow as % of annual mean flow", pal = palFlowDiffMeanBin, values = monsites$percdiffmean, opacity = 1)
       #addPolygons(data = rivers)
       #altpopup for circle markers - in case we revert to popup on click, this popup has the hyperlinked items: paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',hoversite$siteID,'?tab=api">',hoversite$name,'</a></div><div class="popupbody">Latest measurement: <a href="',hoversite$resultsetnoangle,'?tab=api">',formatNos(hoversite$value),'m<sup>3</sup> / sec</a></div><div class="popupbody">The annual mean flow at this site is <a href="',hoversite$meanannflownoangle,'?tab=api">', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</a></div>')        
     
@@ -324,7 +327,7 @@ observeEvent(input$map_marker_mouseover$id, {
   leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),' m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', ifelse(is.na(hoversite$meanannflowval),'Not available</div>',paste0(formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div>')),'<div>Time of last measurement: ',format(as.POSIXct(hoversite$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),'</div>'))
 })
 
-
+#Radio button to change the map background between terrain and satellite
 observe({
   if(input$mapbackground == 'terr') {
     provtiles <- 'Esri.WorldStreetMap'
@@ -335,6 +338,76 @@ observe({
   }
   leafletProxy("map") %>%
     addProviderTiles(provtiles)
+})
+
+#Radio button controller to change the colour of the map markers
+#Switch would be better, but can't seem to get it to work. Though perhaps quotes may help - do If's first, then revisit.
+#For this - need to add in other ifs, and remove legends.
+observe({
+    if(input$markercolour == 'percmean') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Current flow as % of annual mean flow", pal = palFlowDiffMeanBin, values = monsites$percdiffmean, opacity = 1)
+    }
+    if(input$markercolour == 'percmax') {
+      print("percmax worked")
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMaxBin(percdiffmax), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Current flow as % of max flow", pal = palFlowDiffMaxBin, values = monsites$percdiffmax, opacity = 1)
+    }
+    if(input$markercolour == 'latflow') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlow(value), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Current flow (m3/s)", pal = palFlow, values = monsites$value, opacity = 1)
+    } 
+    if(input$markercolour == 'meanflow') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palMeanFlow(meanannflowval), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Mean annual flow (m3/s)", pal = palMeanFlow, values = monsites$meanannflowval, opacity = 1)
+    }
+    if(input$markercolour == 'maxflow') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palMaxFlow(maxflowval), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Max flow (m3/s)", pal = palMaxFlow, values = monsites$maxflowval, opacity = 1)
+    }
+    if(input$markercolour == 'elevation') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palElevation(elevation), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Elevation(m)", pal = palElevation, values = monsites$elevation, opacity = 1)
+    }
+    if(input$markercolour == 'geology') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palGeology(geologylabel), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Geology", pal = palGeology, values = monsites$geologylabel, opacity = 1)
+    }
+    if(input$markercolour == 'climate') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palClimate(climatelabel), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Climate", pal = palClimate, values = monsites$climatelabel, opacity = 1)
+    }
+    if(input$markercolour == 'landcover') {
+      leafletProxy("map") %>%
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palLandcover(landcoverlabel), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addLegend("bottomleft",title="Landcover", pal = palLandcover, values = monsites$landcoverlabel, opacity = 1)
+    }
 })
 
 observeEvent(input$refreshchart, {
