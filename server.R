@@ -204,7 +204,7 @@ server <- (function(input, output, session) {
   palElevation <- colorNumeric(palette = "Spectral",domain = monsites$elevation)
   
   #geology
-  palGeology <-colorFactor(palette = "Set1",domain = monsites$geologylabel)
+  palGeology <-colorFactor(palette = "Set2",domain = monsites$geologylabel)
   
   #climate
   palClimate <-colorFactor(palette = "Set1",domain = monsites$climatelabel)
@@ -220,6 +220,27 @@ server <- (function(input, output, session) {
   
   #Just the maxflow
   palMaxFlow <- colorNumeric(palette = "Spectral",domain = monsites$maxflowval)
+  
+  #functions to set the size of the markers
+  #Based on the most recent flow value
+  sizeFlow <- function(value) {
+    return(value/10)
+  }
+  #Based on the max flow value
+  sizeMaxFlow <- function(value) {
+    return(value/100)
+  }
+  
+  #based on the percentage differences
+  sizePercFlow <- function(value) {
+    return((value/20)+10)
+  }
+  #based on the elevation
+  sizeElevation <- function(value) {
+    return(value/30)
+  }
+  
+  
   
   #Alternative binning stuff - can probably get rid of these, but they worked and might be useful for THE FUTURE
   #palFlowDiffMeanDecile <- colorQuantile("Spectral", monsites$percdiffmean, n=5)
@@ -342,73 +363,101 @@ observe({
 
 #Radio button controller to change the colour of the map markers
 #Switch would be better, but can't seem to get it to work. Though perhaps quotes may help - do If's first, then revisit.
-#For this - need to add in other ifs, and remove legends.
+
 observe({
+    radvar = 10
+    if(input$markersize== 'sizena') {
+      radvar = 10
+      }
+    if(input$markersize== 'latflow') {
+      radvar = ~sizeFlow(value)
+      }
+    if(input$markersize== 'meanflow') {
+      radvar = ~sizeFlow(meanannflowval)
+    }
+    if(input$markersize== 'maxflow') {
+      radvar = ~sizeMaxFlow(maxflowval)
+    }
+    if(input$markersize== 'percmean') {
+      radvar = ~sizePercFlow(percdiffmean)
+    }
+    if(input$markersize== 'percmax') {
+      radvar = ~sizePercFlow(percdiffmax)
+    }
+    if(input$markersize== 'elevation') {
+      radvar = ~sizeElevation(elevation)
+    }
     if(input$markercolour == 'percmean') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Current flow as % of annual mean flow", pal = palFlowDiffMeanBin, values = monsites$percdiffmean, opacity = 1)
-    }
+      }
     if(input$markercolour == 'percmax') {
       print("percmax worked")
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMaxBin(percdiffmax), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMaxBin(percdiffmax), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Current flow as % of max flow", pal = palFlowDiffMaxBin, values = monsites$percdiffmax, opacity = 1)
     }
     if(input$markercolour == 'latflow') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlow(value), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlow(value), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Current flow (m3/s)", pal = palFlow, values = monsites$value, opacity = 1)
     } 
     if(input$markercolour == 'meanflow') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palMeanFlow(meanannflowval), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palMeanFlow(meanannflowval), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Mean annual flow (m3/s)", pal = palMeanFlow, values = monsites$meanannflowval, opacity = 1)
     }
     if(input$markercolour == 'maxflow') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palMaxFlow(maxflowval), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palMaxFlow(maxflowval), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Max flow (m3/s)", pal = palMaxFlow, values = monsites$maxflowval, opacity = 1)
     }
     if(input$markercolour == 'elevation') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palElevation(elevation), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palElevation(elevation), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Elevation(m)", pal = palElevation, values = monsites$elevation, opacity = 1)
     }
     if(input$markercolour == 'geology') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palGeology(geologylabel), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palGeology(geologylabel), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Geology", pal = palGeology, values = monsites$geologylabel, opacity = 1)
     }
     if(input$markercolour == 'climate') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palClimate(climatelabel), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palClimate(climatelabel), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Climate", pal = palClimate, values = monsites$climatelabel, opacity = 1)
     }
     if(input$markercolour == 'landcover') {
       leafletProxy("map") %>%
         clearMarkers() %>%
         clearControls() %>%
-        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palLandcover(landcoverlabel), radius=10, fillOpacity=0.9,layerId=monsites$sitesub) %>%
+        addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palLandcover(landcoverlabel), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
         addLegend("bottomleft",title="Landcover", pal = palLandcover, values = monsites$landcoverlabel, opacity = 1)
     }
+    
 })
+
+observe({
+   
+ })
+
 
 observeEvent(input$refreshchart, {
   
