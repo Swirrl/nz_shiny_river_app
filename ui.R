@@ -48,16 +48,15 @@ navbarPage("New Zealand River Monitoring", id="nav",
                         # Shiny versions prior to 0.11 should use class="modal" instead.
                         absolutePanel(id = "controls",style = " overflow-y: auto; ", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
-                                      width = 450, height = "80%",
-                                      tabsetPanel(
-                                        tabPanel("Controls",
+                                      width = 450, height = "90%",
+                                      
                                         
-                                      radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = FALSE),
-                                      radioButtons('markercolour', 'Marker Colours', choices = c('Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Elevation' = 'elevation', 'Geology' = 'geology', 'Climate' = 'climate', 'Landcover' = 'landcover'), selected = 'percmean', inline=FALSE),
-                                      radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Elevation' = 'elevation'), selected = 'sizena', inline=FALSE)),
+                                      radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = TRUE),
+                                      #radioButtons('markercolour', 'Marker Colours', choices = c('Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Elevation' = 'elevation', 'Geology' = 'geology', 'Climate' = 'climate', 'Landcover' = 'landcover'), selected = 'percmean', inline=FALSE),
+                                      #radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Elevation' = 'elevation'), selected = 'sizena', inline=FALSE),
+                                      radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow'), selected='sizena', inline = TRUE),
                                       #checkboxGroupInput('mapbits','Show on the map',choices = c('Background' = 'checkmapbackground','Rivers' = 'checkrivers','Regions' = 'checkregions', 'Reaches' = 'checkreaches', 'Catchments' = 'checkcatchments'),inline = FALSE, selected = 'checkmapbackground'),
-                                      tabPanel("Info",
-                                               h4("River Flow Monitoring Stations"),
+                                      h4("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),
                                       tags$head(tags$style(".popupbody{
                                             font-weight: bold;
@@ -111,9 +110,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       p("Geology: ",style="display:inline"), htmlOutput('geology'),
                                       br(),
                                       br(),
-                                      htmlOutput(("photo"), align = 'center'))
-                                      
-                                  )),
+                                      htmlOutput(("photo"), align = 'center')),
                         
                         tags$div(id="cite",
                                  'Data compiled for: ', tags$em('New Zealand Ministry of Environment'), ' Swirrl (2017).'
