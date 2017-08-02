@@ -1,223 +1,39 @@
 
-# This is the server logic for a Shiny web application.
-# You can find out more about building applications with Shiny here:
-#
-# http://shiny.rstudio.com
-#
-
-library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(classInt) ; library(grDevices)
-
-#To add rivers back in need to uncomment this line and the line adding the polygon to the map
-#rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
-
-#endpoint <- "http://envdatapoc.co.nz/sparql"
-endpoint <- "http://guest:eidipoc@envdatapoc.co.nz/sparql"
-
-#This endpoint is the drafter one, with no authentication or
-#endpoint <- "https://production-drafter-nz.publishmydata.com/v1/sparql/live"
-
-startquery <-  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT DISTINCT *
-WHERE {
-{SELECT (max(?datetime) AS ?latest) ?sitesub
-WHERE {
-?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
-?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
-}
-GROUP BY ?sitesub
-      }
-?obs <http://www.w3.org/ns/sosa/resultTime> ?latest .
-?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?sitesub .
-?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-?sitesub <http://envdatapoc.co.nz/def/lawaSiteID> ?siteID .
-?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
-?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat .
-?sitesub	<http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long .
-?sitesub rdfs:label ?name .
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/MALF> ?malf .
-?malf <http://qudt.org/1.1/schema/qudt#numericValue> ?malfval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/maxRecordedFlow> ?maxflow .
-?maxflow <http://qudt.org/1.1/schema/qudt#numericValue> ?maxflowval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFlow> ?meanannflow .
-?meanannflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanannflowval . }
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/meanAnnualFloodFlow> ?meanfloodflow .
-?meanfloodflow <http://qudt.org/1.1/schema/qudt#numericValue> ?meanfloodflowval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/minRecordedFlow> ?minflow .
-?minflow <http://qudt.org/1.1/schema/qudt#numericValue> ?minflowval .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
-?catchment rdfs:label ?catchmentname .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
-?reach <http://envdatapoc.co.nz/def/climate> ?climate .
-?reach <http://envdatapoc.co.nz/def/geology> ?geology .
-?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
-?climate rdfs:label ?climatelabel.
-?geology rdfs:label ?geologylabel.
-?landcover rdfs:label ?landcoverlabel .
-}
-OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
-OPTIONAL {?sitesub <http://schema.org/image> ?image .}
-}"
-
-
-
-#function that formats numbers
-formatNos <- function (x) {
-  formatC(x, digits = 2, format = "f", big.mark = ",")
-}
-
-cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-
-qd <- SPARQL(endpoint,startquery)
-
-
-
-monsites <- qd$results
-
-#this is unnecessarily complicated - keeping in comments for now
-#monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
-
-monsites$percdiffmean <- (monsites$value/monsites$meanannflowval)*100
-monsites$percdiffmax <- (monsites$value/monsites$maxflowval)*100
-monsites$obsnoangle <- gsub('^.|.$', '', monsites$obs)
-monsites$sitesubnoangle <- gsub('^.|.$', '', monsites$sitesub)
-monsites$maxflownoangle <- gsub('^.|.$', '', monsites$maxflow)
-monsites$climatenoangle <- gsub('^.|.$', '', monsites$climate)
-monsites$geologynoangle <- gsub('^.|.$', '', monsites$geology)
-monsites$landcovernoangle <- gsub('^.|.$', '', monsites$landcover)
-monsites$malfnoangle <- gsub('^.|.$', '', monsites$malf)
-monsites$minflownoangle <- gsub('^.|.$', '', monsites$minflow)
-monsites$meanannflownoangle <- gsub('^.|.$', '', monsites$meanannflow)
-monsites$meanfloodflownoangle <- gsub('^.|.$', '', monsites$meanfloodflow)
-monsites$resultsetnoangle <- gsub('^.|.$', '', monsites$resultset)
-#monsites <- monsites[which (monsites$mtype == "<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>"), ]
-
-dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',monsites$siteID,'?tab=api" target="_blank">',monsites$name,'</a>'),
-                         "Latest" = paste0('<a href="',monsites$resultsetnoangle,'?tab=api" target="_blank">',monsites$value,'</a>'),
-                         "Date/Time" = format(as.POSIXct(monsites$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),
-                         "Annual Mean Flow" = round(monsites$meanannflowval, digits = 2),
-                         "Perc diff from mean" = round(monsites$percdiffmean, digits = 2),
-                         "Elevation" = monsites$elevation,
-                         "Catchment" = monsites$catchmentname,
-                         "Climate" = paste0('<a href="',monsites$climatenoangle,'?tab=api" target="_blank">',monsites$climatelabel,'</a>'),
-                         "Geology" = paste0('<a href="',monsites$geologynoangle,'?tab=api" target="_blank">',monsites$geologylabel,'</a>'),
-                         "Landcover" = paste0('<a href="',monsites$landcovernoangle,'?tab=api" target="_blank">',monsites$landcoverlabel,'</a>'),
-                         "Lat" = round(as.numeric(monsites$lat),digits = 7),
-                         "Long" = round(as.numeric(monsites$long),digits = 7))
-
-
-#Site data formatted sloghtly better for download
-dlmonsites <- data.frame("siteID" = monsites$siteID,
-                         "site_name" = monsites$name,
-                         "latest_result_time" = format(as.POSIXct(monsites$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),
-                         "latest_flow_value" = monsites$value,
-                         "max_flow_value" = monsites$maxflowval,
-                         "mean_annual_flow_value" = monsites$meanannflowval,
-                         "mean_flood_flow_value" = monsites$meanfloodflowval,
-                         "malf_value" = monsites$malfval,
-                         "min_flow_val" = monsites$minflowval,
-                         "catchment" = monsites$catchmentname,
-                         "climate" = monsites$climatelabel,
-                         "geology" = monsites$geologylabel,
-                         "landcover" = monsites$landcoverlabel,
-                         "elevation" = monsites$elevation,
-                         "lat" = monsites$lat,
-                         "long" = monsites$long
-)
-
-query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT ?resultset ?datetime ?value ?name ?type ?reach
-  WHERE {
-    ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-    ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?site .
-    ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-    ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> "
-
-query3_2 <- " .
-
-    ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-    ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
-    ?obs <http://www.w3.org/ns/sosa/observedProperty> ?type .
-    ?site rdfs:label ?name .
-    ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
-    OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
-
-
-  }"
-
-#This is the query that powers the multi-line chart
-query4_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT ?resultset ?datetime ?value ?name ?type ?reach
-WHERE {
-?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
-?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?site .
-?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
-?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
-?obs <http://www.w3.org/ns/sosa/observedProperty> ?type .
-?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
-?site rdfs:label ?name .
-?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
-OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
-FILTER (?datetime > '"
-
-query4_2 <- "'^^xsd:dateTime && ?datetime < '"
-
-query4_3 <- "'^^xsd:dateTime && ?name IN('"
-
-query4_4 <- "'))
-
-}"
-
-provtiles = 'Esri.WorldStreetMap'
-
 server <- (function(input, output, session) {
+  
   
   source('global.R', local=TRUE)
   
   #draw the table in the 'data' tab
   output$table <- DT::renderDataTable(datatable(dtmonsites,colnames = c("Site Name", "Latest flow reading","Time of latest reading (yyyy-mm-dd hh:mm:ss)","Annual Mean Flow", "% Between latest and mean", "Elevation","Catchment","Climate","Geology", "Landcover","Lat","Long"), escape = 1))
   
-  # Put the default map co-ordinates and zoom level into variables
+  # Put the default map co-ordinates and zoom level for the map into variables
   lat <- -40.542788
   lng <- 176.144708
   zoom <- 6
   
   
   #Hard coded breaks for the binning for markers. Uses library classIntervals
-  
-  #percentage difference from the mean
   breakspercdiffmean <- classIntervals(monsites$percdiffmean,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,5000), intervalClosure = 'right')
-  palFlowDiffMeanBin <- colorBin("Spectral", domain = breakspercdiffmean$brks, bins = breakspercdiffmean$brks, pretty = FALSE, na.color = '#dddddd')
-  
-  #percentage difference from the max
   breakspercdiffmax <- classIntervals(monsites$percdiffmax,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,10000), intervalClosure = 'right')
-  palFlowDiffMaxBin <- colorBin("Spectral", domain = breakspercdiffmax$brks, bins = breakspercdiffmax$brks, pretty = FALSE, na.color = '#dddddd')
   
+  #Functions for getting marker colours
+  #percentage difference from the mean
+  palFlowDiffMeanBin <- colorBin("Spectral", domain = breakspercdiffmean$brks, bins = breakspercdiffmean$brks, pretty = FALSE, na.color = '#dddddd')
+  #percentage difference from the max
+  palFlowDiffMaxBin <- colorBin("Spectral", domain = breakspercdiffmax$brks, bins = breakspercdiffmax$brks, pretty = FALSE, na.color = '#dddddd')
   #elevation
   palElevation <- colorNumeric(palette = "Spectral",domain = monsites$elevation)
-  
   #geology
   palGeology <-colorFactor(palette = "Set2",domain = monsites$geologylabel)
-  
   #climate
   palClimate <-colorFactor(palette = "Set1",domain = monsites$climatelabel)
-  
   #landcover
   palLandcover <-colorFactor(palette = "Set1",domain = monsites$landcoverlabel)
-  
   #Just the flow
   palFlow <- colorNumeric(palette = "Spectral",domain = monsites$value)
-  
   #Just the meanflow
   palMeanFlow <- colorNumeric(palette = "Spectral",domain = monsites$meanannflowval)
-  
   #Just the maxflow
   palMaxFlow <- colorNumeric(palette = "Spectral",domain = monsites$maxflowval)
   
@@ -230,7 +46,6 @@ server <- (function(input, output, session) {
   sizeMaxFlow <- function(value) {
     return(value/100)
   }
-  
   #based on the percentage differences
   sizePercFlow <- function(value) {
     return((value/20)+10)
@@ -240,14 +55,7 @@ server <- (function(input, output, session) {
     return(value/30)
   }
   
-  
-  
-  #Alternative binning stuff - can probably get rid of these, but they worked and might be useful for THE FUTURE
-  #palFlowDiffMeanDecile <- colorQuantile("Spectral", monsites$percdiffmean, n=5)
-  #palFlowDiffMeanBinSimple <- colorBin("Spectral", domain = c(-5000,5000),4, pretty = FALSE)
-  
-  
- # Draw the map
+ #Draw the map
   output$map <- renderLeaflet({
     
     leaflet() %>% 
@@ -313,12 +121,6 @@ observe({
   image <- ifelse((is.na(imgurl)),paste0('<p></p>'),paste0('<img src="',imgurl,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')) 
   
   output$photo <- renderText(image)
-  
-  #imgsource <- filtmonsites$image
-  
-  # output$photo <- ifelse((imgsource=='NA'),renderText("<div></div>"),renderText({
-  #      c('<img src="',imgsource,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')
-  #   }))
 
   
   output$downloadData <- downloadHandler(
@@ -331,12 +133,7 @@ observe({
   })
 })
 
-
-observeEvent(input$map_marker_mouseout$id, {
-  leafletProxy("map") %>% clearPopups()
-})
-
-# When circle is hovered over...show a popup
+# When circle marker is hovered over show a popup
 observeEvent(input$map_marker_mouseover$id, {
   radius = 2
   pointId <- input$map_marker_mouseover$id
@@ -346,6 +143,11 @@ observeEvent(input$map_marker_mouseover$id, {
   offset = isolate((input$map_bounds$north - input$map_bounds$south) / (23 + radius + (18 - input$map_zoom)^2 ))
   latoffset <- as.numeric(latp) + offset
   leafletProxy("map") %>% addPopups(lat = latoffset, lng = lngp, paste0('<div class="popuptitle">Site:',hoversite$name,'</div><div class="popupbody">Latest measurement: ',formatNos(hoversite$value),' m<sup>3</sup> / sec</div><div class="popupbody">Annual mean flow: ', ifelse(is.na(hoversite$meanannflowval),'Not available</div>',paste0(formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</div>')),'<div>Time of last measurement: ',format(as.POSIXct(hoversite$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),'</div>'))
+})
+
+#Clear the popup when mouse leaves the marker
+observeEvent(input$map_marker_mouseout$id, {
+  leafletProxy("map") %>% clearPopups()
 })
 
 #Radio button to change the map background between terrain and satellite
@@ -361,8 +163,8 @@ observe({
     addProviderTiles(provtiles)
 })
 
-#Radio button controller to change the colour of the map markers
-#Switch would be better, but can't seem to get it to work. Though perhaps quotes may help - do If's first, then revisit.
+
+#Radio buttons to change the colour and size of the map markers
 
 observe({
     radvar = 10
@@ -466,16 +268,25 @@ observeEvent(input$refreshchart, {
   output$nodata <- renderText("<p></p>")
   rivers <- input$sitesel
   rivers <- paste(rivers,sep="", collapse = "','")
+  
   fromdate <- input$datepicker[1]
   todate <- input$datepicker[2]
-  #print(as.POSIXct(fromdate))
-  #print(as.POSIXct(todate))
-  #print(click)
-  #click <- "Hautapu at Alabasters"
+  fromdatesparql <- paste0(input$datepicker[1],'T00:00:00+12:00')
+  todatesparql <- paste0(input$datepicker[2],'T00:00:00+12:00')
   
-  #print(click)
-  query4 <- paste0(query4_1,fromdate,query4_2,todate,query4_3,rivers,query4_4)
-  #print(query4)
+  timediff <- (todate - fromdate)
+  if (timediff <= 3) {
+    query4filt <- ""
+  }
+  if (timediff > 3 && timediff <= 21) {
+    query4filt <-'FILTER(CONTAINS(str(?datetime),":00:00")) . '
+  }
+  if (timediff >21) {
+    query4filt <- 'FILTER(CONTAINS(str(?datetime),"00:00:00")) . '
+  }
+ 
+  query4 <- paste0(query4_1,fromdatesparql,query4_2,todatesparql,query4_3,rivers,query4_4,query4filt,query4_5)
+  
   qd4 <- SPARQL(endpoint,query4)
   monsitesmeasuremulti <- qd4$results
   if(nrow(monsitesmeasuremulti)==0) {

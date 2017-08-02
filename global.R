@@ -109,7 +109,7 @@ dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/m
                          "Long" = round(as.numeric(monsites$long),digits = 7))
 
 
-#Site data formatted sloghtly better for download
+#Site data formatted slightly better for download
 dlmonsites <- data.frame("siteID" = monsites$siteID,
                          "site_name" = monsites$name,
                          "latest_result_time" = format(as.POSIXct(monsites$latest, origin = "1970-01-01"),"%Y-%m-%d %X"),
@@ -128,6 +128,8 @@ dlmonsites <- data.frame("siteID" = monsites$siteID,
                          "long" = monsites$long
 )
 
+
+
 query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?resultset ?datetime ?value ?name ?type ?reach
@@ -145,6 +147,7 @@ query3_2 <- " .
     ?site rdfs:label ?name .
     ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
     OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
+    FILTER(CONTAINS(str(?datetime),':00:00')) . 
     
     
   }"
@@ -153,25 +156,26 @@ query3_2 <- " .
 query4_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT ?resultset ?datetime ?value ?name ?type ?reach
+SELECT ?resultset ?datetime ?value ?name ?reach
 WHERE {
 ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
 ?obs <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ?site .
 ?obs <http://www.w3.org/ns/sosa/hasResult> ?resultset .
 ?obs <http://www.w3.org/ns/sosa/resultTime> ?datetime .
-?obs <http://www.w3.org/ns/sosa/observedProperty> ?type .
 ?obs <http://www.w3.org/ns/sosa/observedProperty> <https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level> .
 ?site rdfs:label ?name .
 ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
 OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
-FILTER (?datetime > '"
+FILTER (?datetime >= '"
 
-query4_2 <- "'^^xsd:dateTime && ?datetime < '"
+query4_2 <- "'^^xsd:dateTime && ?datetime <= '"
 
 query4_3 <- "'^^xsd:dateTime && ?name IN('"
 
-query4_4 <- "'))
+query4_4 <- "')) ."
 
-}"
+query4_5 <- "}"
+
+
 
 provtiles = 'Esri.WorldStreetMap'
