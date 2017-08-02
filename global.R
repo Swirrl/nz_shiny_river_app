@@ -6,14 +6,9 @@
 
 library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(classInt) ; library(grDevices)
 
-#To add rivers back in need to uncomment this line and the line adding the polygon to the map
-#rivers <- readOGR(dsn = 'nz_riverssimp.geojson', layer = 'OGRGeoJSON')
 
 #endpoint <- "http://envdatapoc.co.nz/sparql"
-endpoint <- "http://guest:eidipoc@envdatapoc.co.nz/sparql"
-
-#This endpoint is the drafter one, with no authentication or 
-#endpoint <- "https://production-drafter-nz.publishmydata.com/v1/sparql/live"
+endpoint <- "http://guest:eidipoc@envdatapoc.co.nz/sparql" #with simple authentication
 
 startquery <-  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -77,8 +72,8 @@ qd <- SPARQL(endpoint,startquery)
 
 monsites <- qd$results
 
-#this is unnecessarily complicated - keeping in comments for now
-#monsites$percdiffmean <- ((monsites$value - monsites$meanannflowval)/monsites$meanannflowval)*100
+
+
 
 monsites$percdiffmean <- (monsites$value/monsites$meanannflowval)*100
 monsites$percdiffmax <- (monsites$value/monsites$maxflowval)*100
@@ -129,7 +124,7 @@ dlmonsites <- data.frame("siteID" = monsites$siteID,
 )
 
 
-
+#Query for the chart in the map sidebar
 query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?resultset ?datetime ?value ?name ?type ?reach
@@ -176,6 +171,5 @@ query4_4 <- "')) ."
 
 query4_5 <- "}"
 
-
-
+#Set the starting variable for the background tiles
 provtiles = 'Esri.WorldStreetMap'

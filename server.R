@@ -18,42 +18,43 @@ server <- (function(input, output, session) {
   breakspercdiffmax <- classIntervals(monsites$percdiffmax,n=6, style='fixed', fixedBreaks=c(0,25,50,100,150,200,10000), intervalClosure = 'right')
   
   #Functions for getting marker colours
+  #Many of these are commented out because they are not active in the report, but preserved in case someon wants to re-activate in the future
   #percentage difference from the mean
   palFlowDiffMeanBin <- colorBin("Spectral", domain = breakspercdiffmean$brks, bins = breakspercdiffmean$brks, pretty = FALSE, na.color = '#dddddd')
-  #percentage difference from the max
-  palFlowDiffMaxBin <- colorBin("Spectral", domain = breakspercdiffmax$brks, bins = breakspercdiffmax$brks, pretty = FALSE, na.color = '#dddddd')
-  #elevation
-  palElevation <- colorNumeric(palette = "Spectral",domain = monsites$elevation)
-  #geology
-  palGeology <-colorFactor(palette = "Set2",domain = monsites$geologylabel)
-  #climate
-  palClimate <-colorFactor(palette = "Set1",domain = monsites$climatelabel)
-  #landcover
-  palLandcover <-colorFactor(palette = "Set1",domain = monsites$landcoverlabel)
-  #Just the flow
-  palFlow <- colorNumeric(palette = "Spectral",domain = monsites$value)
-  #Just the meanflow
-  palMeanFlow <- colorNumeric(palette = "Spectral",domain = monsites$meanannflowval)
-  #Just the maxflow
-  palMaxFlow <- colorNumeric(palette = "Spectral",domain = monsites$maxflowval)
+  ##percentage difference from the max
+  #palFlowDiffMaxBin <- colorBin("Spectral", domain = breakspercdiffmax$brks, bins = breakspercdiffmax$brks, pretty = FALSE, na.color = '#dddddd')
+  ##elevation
+  #palElevation <- colorNumeric(palette = "Spectral",domain = monsites$elevation)
+  ##geology
+  #palGeology <-colorFactor(palette = "Set2",domain = monsites$geologylabel)
+  ##climate
+  #palClimate <-colorFactor(palette = "Set1",domain = monsites$climatelabel)
+  ##landcover
+  #palLandcover <-colorFactor(palette = "Set1",domain = monsites$landcoverlabel)
+  ##Just the flow
+  #palFlow <- colorNumeric(palette = "Spectral",domain = monsites$value)
+  ##Just the meanflow
+  #palMeanFlow <- colorNumeric(palette = "Spectral",domain = monsites$meanannflowval)
+  ##Just the maxflow
+  #palMaxFlow <- colorNumeric(palette = "Spectral",domain = monsites$maxflowval)
   
   #functions to set the size of the markers
   #Based on the most recent flow value
   sizeFlow <- function(value) {
     return(value/10)
   }
-  #Based on the max flow value
-  sizeMaxFlow <- function(value) {
-    return(value/100)
-  }
-  #based on the percentage differences
-  sizePercFlow <- function(value) {
-    return((value/20)+10)
-  }
-  #based on the elevation
-  sizeElevation <- function(value) {
-    return(value/30)
-  }
+  ##Based on the max flow value
+  #sizeMaxFlow <- function(value) {
+  #  return(value/100)
+  #}
+  ##based on the percentage differences
+  #sizePercFlow <- function(value) {
+  #  return((value/20)+10)
+  #}
+  ##based on the elevation
+  #sizeElevation <- function(value) {
+  #  return(value/30)
+  #}
   
  #Draw the map
   output$map <- renderLeaflet({
@@ -67,7 +68,7 @@ server <- (function(input, output, session) {
       #altpopup for circle markers - in case we revert to popup on click, this popup has the hyperlinked items: paste0('<div class="popuptitle">Site: <a href="http://envdatapoc.co.nz/doc/measurement-site/',hoversite$siteID,'?tab=api">',hoversite$name,'</a></div><div class="popupbody">Latest measurement: <a href="',hoversite$resultsetnoangle,'?tab=api">',formatNos(hoversite$value),'m<sup>3</sup> / sec</a></div><div class="popupbody">The annual mean flow at this site is <a href="',hoversite$meanannflownoangle,'?tab=api">', formatNos(hoversite$meanannflowval),' m<sup>3</sup> / sec</a></div>')        
     
   })
-  
+  #Download the data when the button is clicked
   output$downloadData1 <- downloadHandler(
     
     filename = function() { paste(Sys.time(), '.csv', sep='') },
@@ -76,7 +77,7 @@ server <- (function(input, output, session) {
     }
   )
   
-  # Introduce the click event so that when a marker is clicked on, it changes the content in the sidebar
+# Introduce the click event so that when a marker is clicked on, it changes the content in the sidebar
 observe({
   withProgress(message = "Please wait - getting data.",detail = 'This may take several seconds...', min=0, max = 10, value = 8, { #This adds the progress bar
     click<-input$map_marker_click
@@ -184,7 +185,9 @@ observe({
             clearControls() %>%
             addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palFlowDiffMeanBin(percdiffmean), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
             addLegend("bottomleft",title="Current flow as % of annual mean flow", pal = palFlowDiffMeanBin, values = monsites$percdiffmean, opacity = 1)
-      }
+    }
+    ##This stuff controls the colouring and sizing of markers according to the radio boxes over in the UI. Removed, as they weren't useful, but kept h
+    ## in case someone wants to reimplement them in the future.
     # if(input$markersize== 'meanflow') {
     #   radvar = ~sizeFlow(meanannflowval)
     # }
@@ -264,13 +267,11 @@ observe({
     #     addCircleMarkers(data = monsites, color = "#666666",weight = 2, fillColor = ~palLandcover(landcoverlabel), radius=radvar, fillOpacity=0.9,layerId=monsites$sitesub) %>%
     #     addLegend("bottomleft",title="Landcover", pal = palLandcover, values = monsites$landcoverlabel, opacity = 1)
     # }
-    
+    ################################
 })
 
-observe({
-   
- })
 
+##The observer function for the multi-line chart
 
 observeEvent(input$refreshchart, {
   

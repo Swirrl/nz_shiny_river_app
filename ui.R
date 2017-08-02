@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny) ; library(plyr); library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(grDevices)
+
 
 navbarPage("New Zealand River Monitoring", id="nav",
            
@@ -27,62 +27,47 @@ navbarPage("New Zealand River Monitoring", id="nav",
            ),
            tabPanel("MAP",
                     div(class="outer",
-                        # tags$head(tags$style(".shiny-progress-container {
-                        #   top: 50% !important;
-                        #   left: 50% !important;
-                        #   margin-top: -100px !important;
-                        #   margin-left: -250px !important; 
-                        #   color: blue;
-                        #   font-size: 20px;
-                        #   font-style: italic;
-                        #   
-                        # }")),
                         tags$head(
-                          # Include our custom CSS
+                          # Include custom CSS
                           includeCSS("styles.css")
-                          
-                          #includeScript("gomap.js")
+                        ),
+                        tags$head(tags$style(".popupbody{
+                                            font-weight: bold;
+                                             font-size: 12px;
+                                             }"
+                                              )
+                        ),
+                        tags$head(tags$style(".popuptitle{
+                                             font-weight: bold;
+                                             font-size: 18px;
+                                             }"
+                                              )
+                        ),
+                        tags$head(tags$style("#stationname{color: #222222;
+                                             font-size: 18px;
+                                             font-weight: bold;
+                                             }"
+                                                          )
+                        ),
+                        tags$head(tags$style("#latestdatetime,#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
+                                             font-size: 16px;
+                                             font-weight: bold;
+                                             display:inline;
+                                             }"
+                                                          )
                         ),
                         leafletOutput("map", width="100%", height="100%"),
-                        
-                        # Shiny versions prior to 0.11 should use class="modal" instead.
                         absolutePanel(id = "controls",style = " overflow-y: auto; ", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 30, bottom = "auto",
                                       width = 450, height = "90%",
-                                      
-                                        
                                       radioButtons('mapbackground','Map Background', choices = c('Terrain' = 'terr','Satellite' = 'sat'), selected = 'terr',inline = TRUE),
+                                      radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow'), selected='sizena', inline = TRUE),
+                                      ##These two sets of radio buttons removed,because though they are interesting, they aren't particularly useful
                                       #radioButtons('markercolour', 'Marker Colours', choices = c('Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Elevation' = 'elevation', 'Geology' = 'geology', 'Climate' = 'climate', 'Landcover' = 'landcover'), selected = 'percmean', inline=FALSE),
                                       #radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow','Mean Flow' = 'meanflow','Max Flow' = 'maxflow', 'Perc Diff Mean' = 'percmean', 'Perc Diff Max' = 'percmax', 'Elevation' = 'elevation'), selected = 'sizena', inline=FALSE),
-                                      radioButtons('markersize', 'Marker Sizes', choices = c('Same size' = 'sizena', 'Latest Flow' = 'latflow'), selected='sizena', inline = TRUE),
-                                      #checkboxGroupInput('mapbits','Show on the map',choices = c('Background' = 'checkmapbackground','Rivers' = 'checkrivers','Regions' = 'checkregions', 'Reaches' = 'checkreaches', 'Catchments' = 'checkcatchments'),inline = FALSE, selected = 'checkmapbackground'),
                                       h4("River Flow Monitoring Stations"),
                                       htmlOutput("stationname"),
-                                      tags$head(tags$style(".popupbody{
-                                            font-weight: bold;
-                                            font-size: 12px;
-                                            }"
-                                              )
-                                      ),
-                                      tags$head(tags$style(".popuptitle{
-                                            font-weight: bold;
-                                                           font-size: 18px;
-                                                           }"
-                                              )
-                                      ),
-                                      tags$head(tags$style("#stationname{color: #222222;
-                                                                        font-size: 18px;
-                                                                        font-weight: bold;
-                                                                        }"
-                                                          )
-                                                ),
-                                      tags$head(tags$style("#latestdatetime,#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
-                                                                        font-size: 16px;
-                                                                        font-weight: bold;
-                                                                        display:inline;
-                                                                       }"
-                                                          )
-                                                ),
+                                      
                                       plotOutput("plot1", height=200, width=400
                                                  ),
                                       div(downloadButton('downloadData', 'Download the data')),
@@ -173,7 +158,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                              
                       )
                     )
-           ),
-           conditionalPanel("false", icon("crosshair"))
+           )
+           
 )
 
