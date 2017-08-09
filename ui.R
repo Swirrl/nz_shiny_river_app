@@ -49,7 +49,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                              }"
                                                           )
                         ),
-                        tags$head(tags$style("#latestdatetime,#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology{color: #222222;
+                        tags$head(tags$style("#latestdatetime,#malf,#minflow,#meanfloodflow,#landcover,#meanflow,#maxflow,#latestreading,#climate,#elevation,#geology,#reachId{color: #222222;
                                              font-size: 16px;
                                              font-weight: bold;
                                              display:inline;
@@ -93,6 +93,8 @@ navbarPage("New Zealand River Monitoring", id="nav",
                                       p("Elevation: ",style="display:inline"), htmlOutput('elevation'),
                                       br(),
                                       p("Geology: ",style="display:inline"), htmlOutput('geology'),
+                                      br(),
+                                      p("Reach ID: ", style="display:inline"), htmlOutput('reachId'),
                                       br(),
                                       br(),
                                       htmlOutput(("photo"), align = 'center')),

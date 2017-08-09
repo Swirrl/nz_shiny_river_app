@@ -46,6 +46,7 @@ OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/catchment> ?catchment .
 ?catchment rdfs:label ?catchmentname .}
 OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/managementZone> ?mgmnt .}
 OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/reach> ?reach .
+?reach rdfs:label ?reachlabel . 
 ?reach <http://envdatapoc.co.nz/def/climate> ?climate .
 ?reach <http://envdatapoc.co.nz/def/geology> ?geology .
 ?reach <http://envdatapoc.co.nz/def/landcover> ?landcover .
@@ -88,6 +89,7 @@ monsites$minflownoangle <- gsub('^.|.$', '', monsites$minflow)
 monsites$meanannflownoangle <- gsub('^.|.$', '', monsites$meanannflow)
 monsites$meanfloodflownoangle <- gsub('^.|.$', '', monsites$meanfloodflow)
 monsites$resultsetnoangle <- gsub('^.|.$', '', monsites$resultset)
+monsites$reachnoangle <- gsub('^.|.$', '', monsites$reach)
 #monsites <- monsites[which (monsites$mtype == "<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>"), ]
 
 dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',monsites$siteID,'?tab=api" target="_blank">',monsites$name,'</a>'),
@@ -100,6 +102,7 @@ dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/m
                          "Climate" = paste0('<a href="',monsites$climatenoangle,'?tab=api" target="_blank">',monsites$climatelabel,'</a>'),
                          "Geology" = paste0('<a href="',monsites$geologynoangle,'?tab=api" target="_blank">',monsites$geologylabel,'</a>'),
                          "Landcover" = paste0('<a href="',monsites$landcovernoangle,'?tab=api" target="_blank">',monsites$landcoverlabel,'</a>'),
+                         "Reach" = paste0('<a href="',monsites$reachnoangle,'?tab=api" target="_blank">',monsites$reachlabel,'</a>'),
                          "Lat" = round(as.numeric(monsites$lat),digits = 7),
                          "Long" = round(as.numeric(monsites$long),digits = 7))
 
@@ -119,6 +122,7 @@ dlmonsites <- data.frame("siteID" = monsites$siteID,
                          "geology" = monsites$geologylabel,
                          "landcover" = monsites$landcoverlabel,
                          "elevation" = monsites$elevation,
+                         "reach" = monsites$reachlabel,
                          "lat" = monsites$lat,
                          "long" = monsites$long
 )

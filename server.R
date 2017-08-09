@@ -5,7 +5,7 @@ server <- (function(input, output, session) {
   source('global.R', local=TRUE)
   
   #draw the table in the 'data' tab
-  output$table <- DT::renderDataTable(datatable(dtmonsites,colnames = c("Site Name", "Latest flow reading","Time of latest reading (yyyy-mm-dd hh:mm:ss)","Annual Mean Flow", "% Between latest and mean", "Elevation","Catchment","Climate","Geology", "Landcover","Lat","Long"), escape = 1))
+  output$table <- DT::renderDataTable(datatable(dtmonsites,colnames = c("Site Name", "Latest flow reading","Time of latest reading (yyyy-mm-dd hh:mm:ss)","Annual Mean Flow", "% Between latest and mean", "Elevation","Catchment","Climate","Geology", "Landcover","Reach","Lat","Long"), escape = 1))
   
   # Put the default map co-ordinates and zoom level for the map into variables
   lat <- -40.542788
@@ -98,7 +98,7 @@ observe({
                           "date" = monsitesmeasure$datetimeformatted,
                           "Flow m3 per s)" = monsitesmeasure$value)
   output$plot1 <- renderPlot({
-    ggplot(data=chartdata, aes(x=date, y=value, colour="Current")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position="bottom",legend.title=element_blank()) + geom_line() + labs(x="Date/Time", y="Flow Volume m3/second") + geom_hline(aes(yintercept = filtmonsites$meanannflowval, linetype="Mean Annual Flow"), color = "green") + scale_linetype_manual(name="",values=c(2) ,guide = guide_legend(override.aes = list(color = c("green"))))
+    ggplot(data=chartdata, aes(x=date, y=value, colour="Current")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position="bottom",legend.title=element_blank()) + geom_line() + labs(x="Date/Time", y=expression(River~Flow~m^3/sec)) + geom_hline(aes(yintercept = filtmonsites$meanannflowval, linetype="Mean Annual Flow"), color = "green") + scale_linetype_manual(name="",values=c(2) ,guide = guide_legend(override.aes = list(color = c("green"))))
   })
   # output$plot2_big_line <- renderPlotly({ggplotly(
   #   ggplot(data=chartdata, aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line() + labs(x="Date/Time", y="Flow Volume m3/second")
@@ -115,6 +115,7 @@ observe({
   output$elevation <-renderText(paste0(ifelse(is.na(filtmonsites$elevation),'Not available',paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api">',filtmonsites$elevation,'m</a>'))))
   output$geology <-renderText(paste0(ifelse(is.na(filtmonsites$geologylabel),'Not available',paste0('<a href="',filtmonsites$geologynoangle,'?tab=api">',filtmonsites$geologylabel,'</a>'))))
   output$landcover <-renderText(paste0(ifelse(is.na(filtmonsites$landcover),'Not available',paste0('<a href="',filtmonsites$landcovernoangle,'?tab=api">',filtmonsites$landcoverlabel,'</a>'))))
+  output$reachId <-renderText(paste0(ifelse(is.na(filtmonsites$reach),'Not available',paste0('<a href="',filtmonsites$reachnoangle,'?tab=api">',filtmonsites$reachlabel,'</a>'))))
   #chartdatasorted <- chartdata[order(chartdata$date), ]
   #latestmeasurement <- last(chartdatasorted$value)
   
@@ -316,7 +317,7 @@ observeEvent(input$refreshchart, {
                           "value" = monsitesmeasuremulti$value)
   
   output$plot2_big_line <- renderPlotly({ggplotly(
-    ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.1) + labs(x="Date/Time", y="Flow Volume m3/second")) 
+    ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.1) + labs(x="Date/Time", y=("River Flow m<sup>3</sup>/second"))) 
   })
   
   output$downloadData2<- downloadHandler(
