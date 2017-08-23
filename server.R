@@ -316,6 +316,8 @@ observeEvent(input$refreshchart, {
                           "date" = monsitesmeasuremulti$datetimeformatted,
                           "value" = monsitesmeasuremulti$value)
   
+  chartdatamultisorted <- chartdatamulti[order(chartdatamulti$site,chartdatamulti$date),]
+  
   output$plot2_big_line <- renderPlotly({ggplotly(
     ggplot(data=chartdatamulti, aes(x=date, y=value, Group=site)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + geom_line(aes(colour=site), size=1.1) + labs(x="Date/Time", y=("River Flow m<sup>3</sup>/second"))) 
   })
@@ -323,7 +325,7 @@ observeEvent(input$refreshchart, {
   output$downloadData2<- downloadHandler(
     filename = function() { paste(Sys.time(), '.csv', sep='') },
     content = function(file) {
-      write.csv(chartdatamulti, file)
+      write.csv(chartdatamultisorted, file)
     }
   )
   
