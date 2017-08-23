@@ -285,7 +285,7 @@ observeEvent(input$refreshchart, {
   fromdate <- input$datepicker[1]
   todate <- input$datepicker[2]
   fromdatesparql <- paste0(input$datepicker[1],'T00:00:00+12:00')
-  todatesparql <- paste0(input$datepicker[2],'T00:00:00+12:00')
+  todatesparql <- paste0(input$datepicker[2],'T23:59:00+12:00')
   
   timediff <- (todate - fromdate)
   if (timediff <= 3) {
