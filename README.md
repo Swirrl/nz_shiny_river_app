@@ -1,4 +1,4 @@
-New Zealand River Monitoring Tool - Proof of Concept
+[h2]New Zealand River Monitoring Tool - Proof of Concept
 
 This tool has been built using the Shiny package from R, and published to a Shiny server.
 
