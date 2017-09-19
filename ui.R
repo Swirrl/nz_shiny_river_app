@@ -19,7 +19,11 @@ navbarPage("New Zealand River Monitoring", id="nav",
                              p("The tool shows river monitoring sites on a map, coloured according to how the current flow rate compares with the average flow rate at that site. Click on a site to load further details, including a time series chart of flow at that site."),
                              p("The 'Data' tab contains a filterable, sortable, searchable list of all sites, along with key facts and context about each site."),
                              p("The 'Chart' tab allows you to view historical data for a site. This chart also has the ability to show multiple sites on the same axes, to support comparisons between sites."),
-                             p("Any text on this site that ",a("appears blue", href = "http://envdatapoc.co.nz/"),(" is a hyperlink. Clicking these links will take you to that thing's page on the PublishMyData platform. This is a more technical view of the data, but does provide more information abut the thing, and can also provide a platform for more advanced queries in the SPARQL endpoint."),
+                             p("Any text on this site that ",a("appears blue", href = "http://envdatapoc.co.nz/", target="_blank"),(" is a hyperlink. Clicking these links will take you to that thing's page on the PublishMyData platform. This is a more technical view of the data, but does provide more information abut the thing, and can also provide a platform for more advanced queries in the SPARQL endpoint."),
+                             p("To get to the PublishMyData platform that powers this tool, please see ", a("http:/envdatapoc.co.nz/", href = "http://envdatapoc.co.nz/", target="_blank"),"."),
+                             p("This tool has been created using R-Shiny. All the code is available on Github, please feel free to fork it here: ", a("https://github.com/Swirrl/nz_shiny_river_app", href = "https://github.com/Swirrl/nz_shiny_river_app", target="_blank"),"."),
+                             p("Video showing how to use this tool:"),
+                             HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/Pp3p85lRfq8" frameborder="0" allowfullscreen></iframe>'),
                              p("The data is licensed as CC-BY-4.0 international."))
                              
                       )
