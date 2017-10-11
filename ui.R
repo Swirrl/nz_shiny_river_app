@@ -7,7 +7,7 @@
 
 
 
-navbarPage("New Zealand River Monitoring", id="nav",
+navbarPage("New Zealand River Monitoring (BETA)", id="nav",
            
            
            tabPanel("ABOUT THIS TOOL",
@@ -23,7 +23,7 @@ navbarPage("New Zealand River Monitoring", id="nav",
                              p("To get to the PublishMyData platform that powers this tool, please see ", a("http:/envdatapoc.co.nz/", href = "http://envdatapoc.co.nz/", target="_blank"),"."),
                              p("This tool has been created using R-Shiny. All the code is available on Github, please feel free to fork it here: ", a("https://github.com/Swirrl/nz_shiny_river_app", href = "https://github.com/Swirrl/nz_shiny_river_app", target="_blank"),"."),
                              p("Video showing how to use this tool:"),
-                             HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/Pp3p85lRfq8" frameborder="0" allowfullscreen></iframe>'),
+                             HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/J34lkdHsHDc" frameborder="0" allowfullscreen></iframe>'),
                              p("The data is licensed as CC-BY-4.0 international."))
                              
                       )
