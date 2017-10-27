@@ -90,6 +90,8 @@ monsites$meanannflownoangle <- gsub('^.|.$', '', monsites$meanannflow)
 monsites$meanfloodflownoangle <- gsub('^.|.$', '', monsites$meanfloodflow)
 monsites$resultsetnoangle <- gsub('^.|.$', '', monsites$resultset)
 monsites$reachnoangle <- gsub('^.|.$', '', monsites$reach)
+monsites$long <- sapply(monsites$long, as.numeric)
+monsites$lat <- sapply(monsites$lat, as.numeric)
 #monsites <- monsites[which (monsites$mtype == "<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>"), ]
 
 dtmonsites <- data.frame("Name" = paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',monsites$siteID,'?tab=api" target="_blank">',monsites$name,'</a>'),
