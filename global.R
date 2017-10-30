@@ -7,8 +7,8 @@
 library(shiny) ; library(plyr) ; library(dplyr) ; library(rgdal) ; library(leaflet) ; library(raster) ; library(SPARQL) ; library(DT) ; library(reshape2) ; library(ggplot2) ; library(plotly) ; library(classInt) ; library(grDevices)
 
 
-#endpoint <- "http://envdatapoc.co.nz/sparql"
-endpoint <- "http://guest:eidipoc@envdatapoc.co.nz/sparql" #with simple authentication
+endpoint <- "http://envdatapoc.co.nz/sparql"
+
 
 startquery <-  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
