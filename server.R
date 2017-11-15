@@ -83,12 +83,14 @@ observe({
     click<-input$map_marker_click
   if(is.null(click))
     return()
-  #print(click$id)
+  
   query3 <- paste0(query3_1,click$id,query3_2)
-  #print(query3)
+  
   qd3 <- SPARQL(endpoint,query3)
   monsitesmeasure <- qd3$results
   monsitesmeasure$datetimeformatted <- as.POSIXct(monsitesmeasure$datetime, origin = "1970-01-01")
+  
+                    
   #monsitesflow <- monsitesmeasure[ which(monsitesmeasure$type == '<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>'),]
   filtmonsites <- monsites[ which(monsites$sitesub==click$id), ]
   chartdata <- data.frame("site" = monsitesmeasure$name,

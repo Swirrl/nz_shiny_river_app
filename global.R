@@ -133,6 +133,7 @@ dlmonsites <- data.frame("siteID" = monsites$siteID,
 #Query for the chart in the map sidebar
 query3_1 <- "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT ?resultset ?datetime ?value ?name ?type ?reach
 WHERE {
 ?obs rdf:type <http://www.w3.org/ns/sosa/Observation> .
@@ -148,7 +149,8 @@ query3_2 <- " .
     ?site rdfs:label ?name .
     ?resultset <http://qudt.org/1.1/schema/qudt#numericValue> ?value .
     OPTIONAL {?site <http://envdatapoc.co.nz/def/reach> ?reach .}
-    FILTER(CONTAINS(str(?datetime),':00:00')) . 
+    FILTER(CONTAINS(str(?datetime),':00:00')) .
+    FILTER(?datetime >= (now()-'P30D'^^xsd:dayTimeDuration))
     
     
   }"
