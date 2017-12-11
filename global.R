@@ -58,6 +58,8 @@ OPTIONAL {?sitesub <http://envdatapoc.co.nz/def/elevation> ?elevation .}
 OPTIONAL {?sitesub <http://schema.org/image> ?image .}
 }"
 
+##Note to pick up - merge these outside of sparql
+
 
 
 #function that formats numbers

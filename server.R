@@ -85,14 +85,16 @@ observe({
     return()
   
   query3 <- paste0(query3_1,click$id,query3_2)
-  
   qd3 <- SPARQL(endpoint,query3)
   monsitesmeasure <- qd3$results
+  filtmonsites <- monsites[ which(monsites$sitesub==click$id), ]
+  if ((nrow(monsitesmeasure))>0)
+  {
   monsitesmeasure$datetimeformatted <- as.POSIXct(monsitesmeasure$datetime, origin = "1970-01-01")
   
                     
   #monsitesflow <- monsitesmeasure[ which(monsitesmeasure$type == '<https://registry.scinfo.org.nz/lab/nems/def/property/flow-water-level>'),]
-  filtmonsites <- monsites[ which(monsites$sitesub==click$id), ]
+  
   chartdata <- data.frame("site" = monsitesmeasure$name,
                           "date" = monsitesmeasure$datetimeformatted,
                           "value" = monsitesmeasure$value)
@@ -125,6 +127,26 @@ observe({
   image <- ifelse((is.na(imgurl)),paste0('<p></p>'),paste0('<img src="',imgurl,'", height=200, style = "border: solid 1px silver; box-shadow: 5px 5px 2px grey", alt="No Image">')) 
   
   output$photo <- renderText(image)
+  }
+  else {
+    chartdata <- NULL
+    output$stationname <- renderText(paste0('<a href="http://envdatapoc.co.nz/doc/measurement-site/',filtmonsites$siteID,'?tab=api" target="_blank">',filtmonsites$name,'</a>'))
+  output$latestreading <- renderText(paste0('No Data in last 30 days'))
+  output$latestdatetime <- renderText(paste0(''))
+  output$maxflow <- renderText(paste0(''))
+  output$meanflow <- renderText(paste0(''))
+  output$malf <- renderText(paste0(''))
+  output$minflow <- renderText(paste0(''))
+  output$meanfloodflow <- renderText(paste0(''))
+  output$climate <-renderText(paste0(''))
+  output$elevation <-renderText(paste0(''))
+  output$geology <-renderText(paste0(''))
+  output$landcover <-renderText(paste0(''))
+  output$reachId <-renderText(paste0(''))
+  output$plot1 <- renderPlot({
+     ggplot(data=data.frame('date'=character(),'value'=integer()), aes(x=date, y=value)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position="bottom",legend.title=element_blank()) + geom_line() + labs(x="Date/Time", y=expression(River~Flow~m^3/sec)) + geom_hline(aes(yintercept = filtmonsites$meanannflowval, linetype="Mean Annual Flow"), color = "green") + scale_linetype_manual(name="",values=c(2) ,guide = guide_legend(override.aes = list(color = c("green"))))
+  })
+  }
 
   
   output$downloadData <- downloadHandler(
